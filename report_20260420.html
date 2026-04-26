@@ -1,0 +1,2115 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>台股選股報告 2026/04/20</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&family=JetBrains+Mono:wght@600&display=swap');
+  :root{
+    --bg:#f0f4f8;--surface:#fff;--border:#e2e8f0;
+    --up:#dc2626;--down:#059669;
+    --blue:#2563eb;--text:#1e293b;--muted:#64748b;--input-bg:#fff;
+  }
+  @media(prefers-color-scheme:dark){
+    :root{
+      --bg:#0f172a;--surface:#1e293b;--border:#334155;
+      --up:#f87171;--down:#4ade80;
+      --blue:#60a5fa;--text:#e2e8f0;--muted:#94a3b8;--input-bg:#0f172a;
+    }
+    .analysis,.metric,.p-metric,.chart-wrap,.sum-card{background:#0f172a!important;}
+    .news-box{border-color:#334155!important;}
+    .news-item{border-color:#334155!important;}
+    .zone-bar{background:#334155!important;}
+    .p-hint{background:#14532d!important;color:#86efac!important;}
+    .p-chase{background:#713f12!important;color:#fde68a!important;}
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--bg);color:var(--text);font-family:'Noto Sans TC',sans-serif;padding:24px 16px;}
+  .header{max-width:900px;margin:0 auto 16px;}
+  .header h1{font-size:22px;font-weight:700;}
+  .header p{color:var(--muted);font-size:13px;margin-top:4px;}
+  .hist-bar{max-width:900px;margin:0 auto 20px;display:flex;gap:6px;flex-wrap:wrap;align-items:center;}
+  .hist-label{font-size:12px;color:var(--muted);margin-right:4px;}
+  .hist-link{font-size:12px;padding:4px 10px;border-radius:20px;border:1px solid var(--border);background:var(--surface);color:var(--muted);text-decoration:none;}
+  .hist-link:hover{background:var(--border);}
+  .hist-link.active{background:#dbeafe;color:#1d4ed8;border-color:#93c5fd;font-weight:700;}
+  .summary{max-width:900px;margin:0 auto 20px;display:grid;grid-template-columns:repeat(4,1fr);gap:10px;}
+  .sum-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px;}
+  .sum-label{font-size:11px;color:var(--muted);margin-bottom:4px;}
+  .sum-val{font-size:24px;font-weight:700;color:var(--up);}
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px;max-width:900px;margin:0 auto 16px;}
+  .card-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:14px;flex-wrap:wrap;gap:8px;}
+  .code{font-family:'JetBrains Mono',monospace;font-size:16px;font-weight:700;color:var(--blue);}
+  .name{font-size:14px;color:var(--muted);margin-left:8px;}
+  .streak{display:inline-block;font-size:11px;padding:2px 8px;border-radius:20px;background:#fef3c7;color:#92400e;margin-left:8px;}
+  .streak-2{background:#fce7f3;color:#9d174d;}
+  .right{text-align:right;}
+  .price{font-size:20px;font-weight:700;color:var(--up);display:block;}
+  .badge{display:inline-block;font-size:11px;padding:2px 8px;border-radius:20px;background:#dbeafe;color:#1d4ed8;margin:4px 2px 0;}
+  .warn{display:inline-block;font-size:11px;padding:2px 8px;border-radius:20px;margin:4px 2px 0;}
+  .warn-ok{background:#fde8e8;color:#9b1c1c;}
+  .warn-bad{background:#dcfce7;color:#166534;}
+  .warn-banner{background:#fee2e2;color:#991b1b;border-radius:8px;padding:8px 12px;margin-bottom:12px;font-size:13px;font-weight:700;}
+  .sort-bar{max-width:900px;margin:0 auto 16px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+  .sort-label{font-size:12px;color:var(--muted);}
+  .sort-btn{font-size:12px;padding:5px 14px;border-radius:20px;border:1px solid var(--border);background:var(--surface);color:var(--muted);cursor:pointer;}
+  .sort-btn:hover{background:var(--border);}
+  .sort-btn.active{background:#dbeafe;color:#1d4ed8;border-color:#93c5fd;font-weight:700;}
+  .search-wrap{max-width:900px;margin:0 auto 12px;display:flex;gap:8px;align-items:center;}
+  .search-input{flex:1;font-size:13px;padding:8px 14px;border-radius:20px;border:1px solid var(--border);background:var(--input-bg);color:var(--text);outline:none;}
+  .search-input:focus{border-color:var(--blue);}
+  .search-count{font-size:12px;color:var(--muted);white-space:nowrap;}
+  .metrics{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:14px;}
+  .metric{background:#f8fafc;border-radius:8px;padding:8px 10px;text-align:center;}
+  .m-label{font-size:10px;color:var(--muted);}
+  .m-val{font-size:14px;font-weight:700;color:var(--text);margin-top:2px;}
+  .section-title{font-size:13px;font-weight:700;margin:12px 0 6px;}
+  .analysis{font-size:13px;line-height:1.8;background:#f8fafc;border-radius:8px;padding:10px 12px;}
+  .news-box{border:1px solid var(--border);border-radius:8px;overflow:hidden;}
+  .news-item{font-size:12px;padding:8px 12px;border-bottom:1px solid var(--border);line-height:1.5;}
+  .news-item:last-child{border-bottom:none;}
+  .chart-wrap{margin:12px 0;border-radius:8px;overflow:hidden;background:#f8fafc;padding:12px;}
+  .chart-title{font-size:12px;font-weight:700;color:var(--muted);margin-bottom:8px;}
+  .chart-legend{display:flex;gap:14px;margin-top:8px;font-size:11px;color:#64748b;}
+  .chart-legend span{display:flex;align-items:center;gap:4px;}
+  .leg-line{display:inline-block;width:16px;height:2px;vertical-align:middle;}
+  .leg-dash{display:inline-block;width:16px;height:0;border-top:2px dashed #dc2626;vertical-align:middle;}
+  .p-section{max-width:900px;margin:0 auto 24px;}
+  .p-section-header{display:flex;justify-content:space-between;align-items:center;font-size:16px;font-weight:700;padding:12px 0 10px;border-bottom:2px solid var(--border);margin-bottom:12px;}
+  .p-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:12px;}
+  .p-header{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;}
+  .p-code{font-family:'JetBrains Mono',monospace;font-size:15px;font-weight:700;color:var(--blue);}
+  .p-name{font-size:14px;color:var(--muted);margin-left:6px;}
+  .p-date{font-size:11px;color:var(--muted);margin-left:8px;}
+  .p-metrics{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:10px;}
+  .p-metric{background:#f8fafc;border-radius:8px;padding:8px 10px;text-align:center;}
+  .p-ml{font-size:10px;color:var(--muted);}
+  .p-mv{font-size:13px;font-weight:700;margin-top:2px;}
+  .p-hint{font-size:13px;padding:8px 12px;border-radius:8px;background:#f0fdf4;color:#166534;font-weight:500;}
+  .p-warn{display:inline-block;font-size:11px;padding:2px 8px;border-radius:20px;background:#fee2e2;color:#991b1b;margin-right:4px;}
+  .p-ok{display:inline-block;font-size:11px;padding:2px 8px;border-radius:20px;background:#dcfce7;color:#166534;}
+  .zone-title{font-size:12px;font-weight:700;color:var(--text);margin-bottom:6px;}
+  .zone-row{display:flex;align-items:center;gap:6px;margin-bottom:4px;font-size:11px;}
+  .zone-label{width:90px;color:var(--muted);flex-shrink:0;}
+  .res-label{color:#dc2626;}
+  .sup-label{color:#059669;}
+  .zone-price{width:50px;font-weight:700;flex-shrink:0;}
+  .zone-dist{width:36px;font-size:10px;flex-shrink:0;}
+  .res-dist{color:#dc2626;}
+  .sup-dist{color:#059669;}
+  .zone-bar{flex:1;height:4px;background:#f1f5f9;border-radius:2px;overflow:hidden;}
+  .zone-fill{height:100%;border-radius:2px;}
+  .res-fill{background:#fca5a5;}
+  .sup-fill{background:#86efac;}
+  .p-chase{background:#fef3c7;color:#92400e;border-radius:8px;padding:8px 12px;margin-bottom:10px;font-size:13px;font-weight:600;}
+  .p-trail{font-size:13px;padding:6px 12px;margin-top:6px;font-weight:500;}
+  .footer{max-width:900px;margin:20px auto 0;text-align:center;font-size:11px;color:var(--muted);padding-bottom:24px;}
+  @media(max-width:600px){
+    .summary{grid-template-columns:repeat(2,1fr);}
+    .metrics{grid-template-columns:repeat(3,1fr);}
+    .p-metrics{grid-template-columns:repeat(2,1fr);}
+    .card-header{flex-direction:column;}
+    .right{text-align:left;}
+    div[style*="grid-template-columns:1fr 1fr"]{grid-template-columns:1fr!important;}
+  }
+</style>
+</head>
+<body>
+<div class="header">
+  <h1>台股選股報告</h1>
+  <p>掃描日期：2026/04/20 · 技術面 + 法人籌碼 + 最新新聞（v6）</p>
+</div>
+
+<div class="hist-bar">
+  <span class="hist-label">歷史報表：</span>
+  
+  <a href="report_20260420.html" class="hist-link active">04/20</a>
+  
+  <a href="report_20260419.html" class="hist-link ">04/19</a>
+  
+</div>
+
+<div class="summary">
+  <div class="sum-card"><div class="sum-label">今日符合標的</div><div class="sum-val">31 檔</div></div>
+  <div class="sum-card"><div class="sum-label">外資主導</div><div class="sum-val">31 檔</div></div>
+  <div class="sum-card"><div class="sum-label">投信主導</div><div class="sum-val">0 檔</div></div>
+  <div class="sum-card"><div class="sum-label">連續上榜3天+</div><div class="sum-val">0 檔</div></div>
+</div>
+
+
+<div class="p-section">
+  <div class="p-section-header">
+    <span>💼 我的持倉追蹤</span>
+    <span style="font-size:14px;color:#dc2626;font-weight:700;">總損益：+12,100 元</span>
+  </div>
+  
+<div class="p-card" style="">
+  
+  <div class="p-header">
+    <div>
+      <span class="p-code">2303</span>
+      <span class="p-name">聯電</span>
+      <span class="p-date">買入：2026/2/25　1張　@67.0元</span>
+    </div>
+    <div style="text-align:right;">
+      <div style="font-size:20px;font-weight:700;color:#dc2626;">+14.78%</div>
+      <div style="font-size:13px;color:#dc2626;">+9,900 元</div>
+      <div style="font-size:12px;color:#64748b;">今日 +5.34%　現價 76.9 元</div>
+    </div>
+  </div>
+  <div class="p-metrics">
+    <div class="p-metric"><div class="p-ml">現價</div><div class="p-mv" style="color:#dc2626;">76.9</div></div>
+    <div class="p-metric"><div class="p-ml">MA5</div><div class="p-mv">68.0</div></div>
+    <div class="p-metric"><div class="p-ml">MA20</div><div class="p-mv">60.56</div></div>
+    <div class="p-metric"><div class="p-ml">出場訊號</div><div class="p-mv"><span class="p-ok">✅ 持續偏多</span></div></div>
+    <div class="p-metric"><div class="p-ml">移動停利線</div><div class="p-mv" style="color:#7c3aed;">73.06 元</div></div>
+  </div>
+  <div class="p-hint">📊 已達保守停利+10%，可先賣出1/4觀察</div>
+  <div class="p-trail" style="color:#7c3aed">🎯 移動停利：最高記錄：76.9元 → 移動停利線：73.06元</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px;">
+    <div><div class="zone-title">📈 上方壓力區間</div><div class="zone-row"><span class="zone-label res-label">+15%停利</span><span class="zone-price">77.05元</span><span class="zone-dist res-dist">+0.2%</span><div class="zone-bar"><div class="zone-fill res-fill" style="width:1.0%"></div></div></div><div class="zone-row"><span class="zone-label res-label">整數 80</span><span class="zone-price">80.0元</span><span class="zone-dist res-dist">+4.0%</span><div class="zone-bar"><div class="zone-fill res-fill" style="width:20.0%"></div></div></div><div class="zone-row"><span class="zone-label res-label">近20日高點</span><span class="zone-price">80.2元</span><span class="zone-dist res-dist">+4.3%</span><div class="zone-bar"><div class="zone-fill res-fill" style="width:21.5%"></div></div></div><div class="zone-row"><span class="zone-label res-label">近60日高點</span><span class="zone-price">80.2元</span><span class="zone-dist res-dist">+4.3%</span><div class="zone-bar"><div class="zone-fill res-fill" style="width:21.5%"></div></div></div><div class="zone-row"><span class="zone-label res-label">+20%停利</span><span class="zone-price">80.4元</span><span class="zone-dist res-dist">+4.6%</span><div class="zone-bar"><div class="zone-fill res-fill" style="width:23.0%"></div></div></div><div style="margin-top:6px;"><span style="font-size:11px;color:#94a3b8;">Fib0.382：69.73元　</span><span style="font-size:11px;color:#7c3aed;font-weight:700;">Fib0.618：63.27元　</span></div></div>
+    <div><div class="zone-title">📉 下方支撐區間</div><div class="zone-row"><span class="zone-label sup-label">整數 70</span><span class="zone-price">70.0元</span><span class="zone-dist sup-dist">-9.0%</span><div class="zone-bar"><div class="zone-fill sup-fill" style="width:45.0%"></div></div></div><div class="zone-row"><span class="zone-label sup-label">費波0.382</span><span class="zone-price">69.73元</span><span class="zone-dist sup-dist">-9.3%</span><div class="zone-bar"><div class="zone-fill sup-fill" style="width:46.5%"></div></div></div><div class="zone-row"><span class="zone-label sup-label">MA5</span><span class="zone-price">68.0元</span><span class="zone-dist sup-dist">-11.6%</span><div class="zone-bar"><div class="zone-fill sup-fill" style="width:58.0%"></div></div></div><div class="zone-row"><span class="zone-label sup-label">買入成本</span><span class="zone-price">67.0元</span><span class="zone-dist sup-dist">-12.9%</span><div class="zone-bar"><div class="zone-fill sup-fill" style="width:64.5%"></div></div></div><div class="zone-row"><span class="zone-label sup-label">費波0.618</span><span class="zone-price">63.27元</span><span class="zone-dist sup-dist">-17.7%</span><div class="zone-bar"><div class="zone-fill sup-fill" style="width:88.5%"></div></div></div><div class="zone-row"><span class="zone-label sup-label">停損-7%</span><span class="zone-price">62.31元</span><span class="zone-dist sup-dist">-19.0%</span><div class="zone-bar"><div class="zone-fill sup-fill" style="width:95.0%"></div></div></div></div>
+  </div>
+  <div class="chart-wrap" style="margin-top:12px;">
+    <div class="chart-title">📈 走勢圖（▲買入 ／ 虛線=關鍵價位）</div>
+    <div style="position:relative;height:180px;width:100%;overflow:hidden;"><canvas id="chart-p2303" class="portfolio-chart"></canvas></div><script id="cd-chart-p2303" type="application/json">{"dates": ["01/13", "01/14", "01/15", "01/16", "01/19", "01/20", "01/21", "01/22", "01/23", "01/26", "01/27", "01/28", "01/29", "01/30", "02/02", "02/03", "02/04", "02/05", "02/06", "02/09", "02/10", "02/11", "02/23", "02/24", "02/25", "02/26", "03/02", "03/03", "03/04", "03/05", "03/06", "03/09", "03/10", "03/11", "03/12", "03/13", "03/16", "03/17", "03/18", "03/19", "03/20", "03/23", "03/24", "03/25", "03/26", "03/27", "03/30", "03/31", "04/01", "04/02", "04/07", "04/08", "04/09", "04/10", "04/13", "04/14", "04/15", "04/16", "04/17", "04/20"], "close": [54.9, 54.0, 54.7, 58.5, 62.5, 67.8, 68.4, 67.6, 64.8, 69.3, 76.2, 75.9, 68.4, 62.4, 60.7, 60.8, 61.8, 61.5, 61.9, 62.4, 62.4, 62.8, 63.9, 67.5, 65.5, 65.4, 64.5, 62.6, 60.0, 62.1, 62.0, 59.7, 60.4, 62.2, 60.6, 59.5, 60.5, 60.7, 61.1, 58.7, 57.8, 56.7, 56.5, 59.1, 58.2, 57.8, 57.0, 56.5, 57.4, 53.6, 58.3, 60.3, 60.0, 62.0, 60.1, 59.7, 62.1, 68.3, 73.0, 76.9], "ma5": [54.44, 54.42, 54.8, 55.48, 56.92, 59.5, 62.38, 64.96, 66.22, 67.58, 69.26, 70.76, 70.92, 70.44, 68.72, 65.64, 62.82, 61.44, 61.34, 61.68, 62.0, 62.2, 62.68, 63.8, 64.42, 65.02, 65.36, 65.1, 63.6, 62.92, 62.24, 61.28, 60.84, 61.28, 60.98, 60.48, 60.64, 60.7, 60.48, 60.1, 59.76, 59.0, 58.16, 57.76, 57.66, 57.66, 57.72, 57.72, 57.38, 56.46, 56.56, 57.22, 57.92, 58.84, 60.14, 60.42, 60.78, 62.44, 64.64, 68.0], "ma20": [50.85, 51.11, 51.38, 51.79, 52.4, 53.25, 54.13, 55.01, 55.76, 56.73, 58.06, 59.38, 60.34, 61.02, 61.63, 62.21, 62.6, 63.03, 63.37, 63.73, 64.1, 64.54, 65.0, 65.45, 65.6, 65.48, 65.29, 65.04, 64.8, 64.44, 63.73, 62.92, 62.52, 62.51, 62.5, 62.44, 62.37, 62.33, 62.29, 62.11, 61.88, 61.57, 61.2, 60.78, 60.41, 60.03, 59.66, 59.35, 59.23, 58.8, 58.61, 58.64, 58.62, 58.61, 58.59, 58.6, 58.68, 59.06, 59.65, 60.56], "vol": [128953, 154811, 98309, 304570, 338651, 469623, 438361, 268253, 268830, 223044, 499434, 525499, 277417, 369865, 192416, 183445, 102061, 92170, 120535, 139921, 91242, 87219, 140691, 182119, 148725, 174910, 96568, 114479, 114266, 75570, 54687, 111723, 75467, 55747, 64444, 64162, 58677, 46464, 65532, 84931, 80718, 62921, 52694, 53911, 34931, 41464, 60495, 71434, 61710, 112129, 163823, 161175, 76399, 150810, 123412, 72941, 143871, 280417, 494806, 348184], "buy_price": 67.0, "trail_stop": 73.06, "buy_idx": 24, "resistances": [[77.05, "+15%停利"], [80.0, "整數 80"], [80.2, "近20日高點"]], "supports": [[70.0, "整數 70"], [69.73, "費波0.382"], [68.0, "MA5"]]}</script>
+  </div>
+</div>
+<div class="p-card" style="">
+  
+  <div class="p-header">
+    <div>
+      <span class="p-code">1605</span>
+      <span class="p-name">華新</span>
+      <span class="p-date">買入：2025/04/14　2張　@32.55元</span>
+    </div>
+    <div style="text-align:right;">
+      <div style="font-size:20px;font-weight:700;color:#dc2626;">+3.38%</div>
+      <div style="font-size:13px;color:#dc2626;">+2,200 元</div>
+      <div style="font-size:12px;color:#64748b;">今日 +4.18%　現價 33.65 元</div>
+    </div>
+  </div>
+  <div class="p-metrics">
+    <div class="p-metric"><div class="p-ml">現價</div><div class="p-mv" style="color:#dc2626;">33.65</div></div>
+    <div class="p-metric"><div class="p-ml">MA5</div><div class="p-mv">32.53</div></div>
+    <div class="p-metric"><div class="p-ml">MA20</div><div class="p-mv">31.36</div></div>
+    <div class="p-metric"><div class="p-ml">出場訊號</div><div class="p-mv"><span class="p-ok">✅ 持續偏多</span></div></div>
+    <div class="p-metric"><div class="p-ml">移動停利線</div><div class="p-mv" style="color:#7c3aed;">31.97 元</div></div>
+  </div>
+  <div class="p-hint">⏳ 持續觀察，等待停利條件觸發</div>
+  
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px;">
+    <div><div class="zone-title">📈 上方壓力區間</div><div class="zone-row"><span class="zone-label res-label">近20日高點</span><span class="zone-price">34.8元</span><span class="zone-dist res-dist">+3.4%</span><div class="zone-bar"><div class="zone-fill res-fill" style="width:17.0%"></div></div></div><div class="zone-row"><span class="zone-label res-label">MA60季線</span><span class="zone-price">35.11元</span><span class="zone-dist res-dist">+4.3%</span><div class="zone-bar"><div class="zone-fill res-fill" style="width:21.5%"></div></div></div><div class="zone-row"><span class="zone-label res-label">+10%停利</span><span class="zone-price">35.8元</span><span class="zone-dist res-dist">+6.4%</span><div class="zone-bar"><div class="zone-fill res-fill" style="width:32.0%"></div></div></div><div class="zone-row"><span class="zone-label res-label">+15%停利</span><span class="zone-price">37.43元</span><span class="zone-dist res-dist">+11.2%</span><div class="zone-bar"><div class="zone-fill res-fill" style="width:56.0%"></div></div></div><div class="zone-row"><span class="zone-label res-label">+20%停利</span><span class="zone-price">39.06元</span><span class="zone-dist res-dist">+16.1%</span><div class="zone-bar"><div class="zone-fill res-fill" style="width:80.5%"></div></div></div><div class="zone-row"><span class="zone-label res-label">整數 40</span><span class="zone-price">40.0元</span><span class="zone-dist res-dist">+18.9%</span><div class="zone-bar"><div class="zone-fill res-fill" style="width:94.5%"></div></div></div><div style="margin-top:6px;"><span style="font-size:11px;color:#94a3b8;">Fib0.382：40.03元　</span><span style="font-size:11px;color:#7c3aed;font-weight:700;">Fib0.618：36.02元　</span></div></div>
+    <div><div class="zone-title">📉 下方支撐區間</div><div class="zone-row"><span class="zone-label sup-label">買入成本</span><span class="zone-price">32.55元</span><span class="zone-dist sup-dist">-3.3%</span><div class="zone-bar"><div class="zone-fill sup-fill" style="width:16.5%"></div></div></div><div class="zone-row"><span class="zone-label sup-label">MA5</span><span class="zone-price">32.53元</span><span class="zone-dist sup-dist">-3.3%</span><div class="zone-bar"><div class="zone-fill sup-fill" style="width:16.5%"></div></div></div><div class="zone-row"><span class="zone-label sup-label">MA20</span><span class="zone-price">31.36元</span><span class="zone-dist sup-dist">-6.8%</span><div class="zone-bar"><div class="zone-fill sup-fill" style="width:34.0%"></div></div></div><div class="zone-row"><span class="zone-label sup-label">停損-7%</span><span class="zone-price">30.27元</span><span class="zone-dist sup-dist">-10.0%</span><div class="zone-bar"><div class="zone-fill sup-fill" style="width:50.0%"></div></div></div><div class="zone-row"><span class="zone-label sup-label">整數 30</span><span class="zone-price">30.0元</span><span class="zone-dist sup-dist">-10.8%</span><div class="zone-bar"><div class="zone-fill sup-fill" style="width:54.0%"></div></div></div><div class="zone-row"><span class="zone-label sup-label">近20日低點</span><span class="zone-price">29.85元</span><span class="zone-dist sup-dist">-11.3%</span><div class="zone-bar"><div class="zone-fill sup-fill" style="width:56.5%"></div></div></div></div>
+  </div>
+  <div class="chart-wrap" style="margin-top:12px;">
+    <div class="chart-title">📈 走勢圖（▲買入 ／ 虛線=關鍵價位）</div>
+    <div style="position:relative;height:180px;width:100%;overflow:hidden;"><canvas id="chart-p1605" class="portfolio-chart"></canvas></div><script id="cd-chart-p1605" type="application/json">{"dates": ["01/13", "01/14", "01/15", "01/16", "01/19", "01/20", "01/21", "01/22", "01/23", "01/26", "01/27", "01/28", "01/29", "01/30", "02/02", "02/03", "02/04", "02/05", "02/06", "02/09", "02/10", "02/11", "02/23", "02/24", "02/25", "02/26", "03/02", "03/03", "03/04", "03/05", "03/06", "03/09", "03/10", "03/11", "03/12", "03/13", "03/16", "03/17", "03/18", "03/19", "03/20", "03/23", "03/24", "03/25", "03/26", "03/27", "03/30", "03/31", "04/01", "04/02", "04/07", "04/08", "04/09", "04/10", "04/13", "04/14", "04/15", "04/16", "04/17", "04/20"], "close": [41.5, 40.9, 44.3, 42.95, 42.05, 42.4, 39.65, 39.05, 38.85, 40.2, 40.6, 43.0, 44.0, 43.5, 39.15, 36.6, 37.65, 36.25, 34.4, 35.85, 34.55, 34.7, 35.15, 36.8, 36.1, 36.75, 36.55, 35.6, 32.15, 33.05, 32.75, 30.5, 31.5, 33.45, 32.05, 32.05, 32.9, 33.8, 33.9, 32.2, 31.85, 30.15, 30.3, 31.9, 31.2, 30.75, 30.55, 30.15, 30.8, 30.1, 30.15, 32.0, 31.45, 31.65, 31.6, 32.2, 32.4, 32.1, 32.3, 33.65], "ma5": [39.32, 39.57, 40.77, 41.84, 42.34, 42.52, 42.27, 41.22, 40.4, 40.03, 39.67, 40.34, 41.33, 42.26, 42.05, 41.25, 40.18, 38.63, 36.81, 36.15, 35.74, 35.15, 34.93, 35.41, 35.46, 35.9, 36.27, 36.36, 35.43, 34.82, 34.02, 32.81, 31.99, 32.25, 32.05, 31.91, 32.39, 32.85, 32.94, 32.97, 32.93, 32.38, 31.68, 31.28, 31.08, 30.86, 30.94, 30.91, 30.69, 30.47, 30.35, 30.64, 30.9, 31.07, 31.37, 31.78, 31.86, 31.99, 32.12, 32.53], "ma20": [33.54, 34.04, 34.78, 35.43, 36.06, 36.68, 37.14, 37.57, 37.93, 38.27, 38.68, 39.24, 39.85, 40.38, 40.66, 40.69, 40.59, 40.49, 40.33, 40.14, 39.8, 39.49, 39.03, 38.72, 38.42, 38.14, 37.98, 37.81, 37.48, 37.12, 36.73, 36.1, 35.48, 34.98, 34.62, 34.39, 34.15, 34.03, 34.01, 33.83, 33.69, 33.46, 33.22, 32.97, 32.73, 32.43, 32.13, 31.86, 31.79, 31.64, 31.51, 31.59, 31.59, 31.49, 31.47, 31.48, 31.46, 31.37, 31.29, 31.36], "vol": [276408, 174988, 363290, 297621, 166548, 137137, 159428, 121678, 66639, 96424, 111562, 259819, 285072, 349112, 183521, 208414, 82456, 56307, 106851, 70627, 45792, 29514, 39724, 60190, 50495, 41188, 45050, 47557, 57592, 41833, 25920, 45749, 29836, 34842, 33856, 26006, 24510, 32433, 30310, 49876, 29857, 31332, 26986, 21309, 16572, 19847, 16761, 31921, 13665, 14976, 10229, 39364, 13909, 22018, 11345, 25225, 33007, 14305, 15689, 69655], "buy_price": 32.55, "trail_stop": 31.97, "buy_idx": 0, "resistances": [[34.8, "近20日高點"], [35.11, "MA60季線"], [35.8, "+10%停利"]], "supports": [[32.55, "買入成本"], [32.53, "MA5"], [31.36, "MA20"]]}</script>
+  </div>
+</div>
+</div>
+
+<div class="sort-bar">
+  <span class="sort-label">排序：</span>
+  <button class="sort-btn active" onclick="sortCards('vol',this)">成交量↓</button>
+  <button class="sort-btn" onclick="sortCards('ratio',this)">量比↓</button>
+  <button class="sort-btn" onclick="sortCards('fdays',this)">外資連買↓</button>
+  <button class="sort-btn" onclick="sortCards('price',this)">股價↑</button>
+</div>
+
+<div class="search-wrap">
+  <input class="search-input" id="search-input" placeholder="🔍 輸入代號或名稱快速篩選..." oninput="filterCards(this.value)">
+  <span class="search-count" id="search-count"></span>
+</div>
+
+
+<div class="card" style=""
+  data-vol="2429"
+  data-ratio="2.05"
+  data-fdays="6"
+  data-price="29.7"
+  data-code="1442"
+  data-name="名軒">
+  
+  <div class="card-header">
+    <div>
+      <span class="code">1442</span>
+      <span class="name">名軒</span>
+      
+    </div>
+    <div class="right">
+      <span class="price">NT$ 29.7</span>
+      <span class="badge">外資✅</span>
+      <span class="warn warn-ok">✅ 持續偏多</span>
+    </div>
+  </div>
+  <div class="metrics">
+    <div class="metric"><div class="m-label">成交量</div><div class="m-val">2,429 張</div></div>
+    <div class="metric"><div class="m-label">量比</div><div class="m-val">2.05x</div></div>
+    <div class="metric"><div class="m-label">外資連買</div><div class="m-val">6 日</div></div>
+    <div class="metric"><div class="m-label">投信連買</div><div class="m-val">0 日</div></div>
+    <div class="metric"><div class="m-label">MA5</div><div class="m-val">27.86</div></div>
+    <div class="metric"><div class="m-label">MA20</div><div class="m-val">26.99</div></div>
+  </div>
+  <div class="section-title">📐 技術面解讀</div>
+  <div class="analysis">📐 均線：MA5(27.86) 高於 MA20(26.99) 0.87元（3.2%），均線多頭排列穩固，上升趨勢明確。<br>📊 MACD：MACD柱狀體剛翻正，動能初步轉強（柱狀體 0.3854）。<br>📦 成交量：明顯放量，買盤積極進場（量比 2.05x，當日 2,429 張）。</div>
+  <div class="chart-wrap">
+    <div class="chart-title">📈 近60日走勢（收盤價 / MA5 / MA20）</div>
+    <div style="position:relative;height:180px;width:100%;overflow:hidden;"><div style="position:relative;height:180px;width:100%;overflow:hidden;"><canvas id="chart-1442" class="scan-chart"></canvas></div><script id="cd-chart-1442" type="application/json">{"dates": ["01/13", "01/14", "01/15", "01/16", "01/19", "01/20", "01/21", "01/22", "01/23", "01/26", "01/27", "01/28", "01/29", "01/30", "02/02", "02/03", "02/04", "02/05", "02/06", "02/09", "02/10", "02/11", "02/23", "02/24", "02/25", "02/26", "03/02", "03/03", "03/04", "03/05", "03/06", "03/09", "03/10", "03/11", "03/12", "03/13", "03/16", "03/17", "03/18", "03/19", "03/20", "03/23", "03/24", "03/25", "03/26", "03/27", "03/30", "03/31", "04/01", "04/02", "04/07", "04/08", "04/09", "04/10", "04/13", "04/14", "04/15", "04/16", "04/17", "04/20"], "close": [30.65, 30.1, 30.2, 29.85, 30.05, 30.05, 29.6, 29.8, 29.65, 29.3, 28.9, 28.85, 29.7, 29.8, 29.5, 29.5, 29.9, 29.95, 29.65, 29.7, 30.1, 30.15, 29.6, 28.9, 28.9, 28.75, 28.75, 28.05, 27.15, 27.65, 27.75, 25.8, 26.55, 26.05, 25.75, 27.35, 27.2, 27.45, 26.9, 27.05, 28.0, 26.8, 26.5, 27.05, 27.1, 26.85, 26.0, 26.1, 26.3, 26.15, 27.5, 27.6, 26.4, 26.2, 26.0, 26.1, 27.2, 27.3, 29.0, 29.7], "ma5": [30.22, 30.24, 30.31, 30.28, 30.17, 30.05, 29.95, 29.87, 29.83, 29.68, 29.45, 29.3, 29.28, 29.31, 29.35, 29.47, 29.68, 29.73, 29.7, 29.74, 29.86, 29.91, 29.84, 29.69, 29.53, 29.26, 28.98, 28.67, 28.32, 28.07, 27.87, 27.28, 26.98, 26.76, 26.38, 26.3, 26.58, 26.76, 26.93, 27.19, 27.32, 27.24, 27.05, 27.08, 27.09, 26.86, 26.7, 26.62, 26.47, 26.28, 26.41, 26.73, 26.79, 26.77, 26.74, 26.46, 26.38, 26.56, 27.12, 27.86], "ma20": [30.05, 29.97, 29.96, 29.93, 30.0, 30.01, 29.99, 29.98, 29.93, 29.87, 29.79, 29.71, 29.72, 29.78, 29.8, 29.8, 29.79, 29.8, 29.78, 29.73, 29.71, 29.71, 29.68, 29.63, 29.57, 29.51, 29.47, 29.38, 29.25, 29.17, 29.11, 28.96, 28.8, 28.62, 28.43, 28.32, 28.19, 28.06, 27.92, 27.79, 27.69, 27.52, 27.36, 27.27, 27.18, 27.09, 26.95, 26.85, 26.81, 26.73, 26.72, 26.81, 26.8, 26.81, 26.82, 26.76, 26.76, 26.75, 26.86, 26.99], "vol": [834, 805, 691, 685, 1058, 498, 918, 538, 338, 511, 1112, 644, 675, 881, 395, 690, 767, 585, 431, 201, 372, 342, 618, 851, 227, 377, 701, 566, 925, 279, 257, 1048, 315, 800, 549, 1190, 781, 523, 540, 479, 1318, 589, 382, 395, 328, 317, 507, 241, 150, 268, 734, 722, 671, 624, 308, 306, 836, 645, 1693, 2429]}</script></div>
+    <div class="chart-legend">
+      <span><span class="leg-line" style="background:#2563eb;"></span>收盤價</span>
+      <span><span class="leg-line" style="background:#f59e0b;"></span>MA5</span>
+      <span><span class="leg-dash"></span>MA20</span>
+    </div>
+  </div>
+  <div class="section-title">💼 法人籌碼</div>
+  <div class="analysis">🌍 外資：連買 6 日（單日最高 586 張），小額但持續，外資默默佈局。<br>🚨 出場警示：✅ 持續偏多</div>
+  <div class="section-title">📰 最新新聞</div>
+  <div class="news-box">
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】(補充114/4/18公告)公告名軒董事會決議擬與關係人簽訂營建工程契約案</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】名軒董事會決議股利分派</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】名軒 2026年3月合併營收7938.9萬元 年增-85.92%</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】名軒 2026年2月合併營收7826.3萬元 年增-83.46%</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】名軒台北市汀州路案結構工程契約</div>
+    
+  </div>
+</div>
+
+<div class="card" style=""
+  data-vol="7744"
+  data-ratio="1.61"
+  data-fdays="6"
+  data-price="28.0"
+  data-code="1809"
+  data-name="中釉">
+  
+  <div class="card-header">
+    <div>
+      <span class="code">1809</span>
+      <span class="name">中釉</span>
+      
+    </div>
+    <div class="right">
+      <span class="price">NT$ 28.0</span>
+      <span class="badge">外資✅</span>
+      <span class="warn warn-ok">✅ 持續偏多</span>
+    </div>
+  </div>
+  <div class="metrics">
+    <div class="metric"><div class="m-label">成交量</div><div class="m-val">7,744 張</div></div>
+    <div class="metric"><div class="m-label">量比</div><div class="m-val">1.61x</div></div>
+    <div class="metric"><div class="m-label">外資連買</div><div class="m-val">6 日</div></div>
+    <div class="metric"><div class="m-label">投信連買</div><div class="m-val">0 日</div></div>
+    <div class="metric"><div class="m-label">MA5</div><div class="m-val">27.22</div></div>
+    <div class="metric"><div class="m-label">MA20</div><div class="m-val">27.09</div></div>
+  </div>
+  <div class="section-title">📐 技術面解讀</div>
+  <div class="analysis">📐 均線：MA5(27.22) 高於 MA20(27.09) 0.13元（0.5%），黃金交叉剛形成，趨勢轉強初期。<br>📊 MACD：MACD柱狀體剛翻正，動能初步轉強（柱狀體 0.0503）。<br>📦 成交量：溫和放量，穩健推升（量比 1.61x，當日 7,744 張）。</div>
+  <div class="chart-wrap">
+    <div class="chart-title">📈 近60日走勢（收盤價 / MA5 / MA20）</div>
+    <div style="position:relative;height:180px;width:100%;overflow:hidden;"><div style="position:relative;height:180px;width:100%;overflow:hidden;"><canvas id="chart-1809" class="scan-chart"></canvas></div><script id="cd-chart-1809" type="application/json">{"dates": ["01/13", "01/14", "01/15", "01/16", "01/19", "01/20", "01/21", "01/22", "01/23", "01/26", "01/27", "01/28", "01/29", "01/30", "02/02", "02/03", "02/04", "02/05", "02/06", "02/09", "02/10", "02/11", "02/23", "02/24", "02/25", "02/26", "03/02", "03/03", "03/04", "03/05", "03/06", "03/09", "03/10", "03/11", "03/12", "03/13", "03/16", "03/17", "03/18", "03/19", "03/20", "03/23", "03/24", "03/25", "03/26", "03/27", "03/30", "03/31", "04/01", "04/02", "04/07", "04/08", "04/09", "04/10", "04/13", "04/14", "04/15", "04/16", "04/17", "04/20"], "close": [19.2, 20.0, 20.7, 22.75, 25.0, 27.5, 28.4, 26.3, 25.25, 27.75, 26.7, 25.95, 24.35, 24.7, 24.0, 26.4, 25.9, 24.9, 23.5, 22.9, 23.2, 23.5, 24.65, 24.75, 24.25, 25.65, 27.1, 27.35, 25.45, 25.5, 25.4, 23.7, 23.7, 25.0, 25.15, 26.0, 25.2, 26.9, 29.55, 32.5, 32.45, 29.25, 27.45, 27.9, 27.45, 28.4, 26.7, 25.65, 26.05, 25.1, 24.7, 26.35, 26.0, 25.55, 26.65, 26.5, 27.3, 27.1, 27.2, 28.0], "ma5": [19.02, 19.15, 19.59, 20.39, 21.53, 23.19, 24.87, 25.99, 26.49, 27.04, 26.88, 26.39, 26.0, 25.89, 25.14, 25.08, 25.07, 25.18, 24.94, 24.72, 24.08, 23.6, 23.55, 23.8, 24.07, 24.56, 25.28, 25.82, 25.96, 26.21, 26.16, 25.48, 24.75, 24.66, 24.59, 24.71, 25.01, 25.65, 26.56, 28.03, 29.32, 30.13, 30.24, 29.91, 28.9, 28.09, 27.58, 27.22, 26.85, 26.38, 25.64, 25.57, 25.64, 25.54, 25.85, 26.21, 26.4, 26.62, 26.95, 27.22], "ma20": [18.02, 18.13, 18.3, 18.57, 18.96, 19.47, 20.0, 20.42, 20.81, 21.32, 21.73, 22.14, 22.48, 22.82, 23.13, 23.54, 23.87, 24.19, 24.43, 24.61, 24.81, 24.98, 25.18, 25.28, 25.24, 25.15, 25.09, 25.14, 25.15, 25.04, 24.97, 24.86, 24.83, 24.84, 24.9, 24.88, 24.84, 24.94, 25.25, 25.73, 26.19, 26.48, 26.62, 26.77, 26.93, 27.07, 27.05, 26.97, 27.0, 26.98, 26.94, 27.07, 27.19, 27.22, 27.29, 27.32, 27.42, 27.43, 27.31, 27.09], "vol": [1603, 4962, 5040, 9524, 4079, 16289, 34321, 15762, 7844, 5049, 15027, 4190, 4597, 4139, 5754, 10436, 9233, 3111, 3199, 2086, 1455, 4050, 2879, 2373, 2526, 7747, 10304, 27149, 5908, 3795, 2143, 2554, 1982, 2305, 3596, 5489, 3051, 12954, 25784, 7756, 42511, 8254, 8507, 4183, 3789, 3089, 2352, 3014, 1824, 2100, 1851, 3004, 2949, 1788, 4065, 3468, 5667, 3533, 3698, 7744]}</script></div>
+    <div class="chart-legend">
+      <span><span class="leg-line" style="background:#2563eb;"></span>收盤價</span>
+      <span><span class="leg-line" style="background:#f59e0b;"></span>MA5</span>
+      <span><span class="leg-dash"></span>MA20</span>
+    </div>
+  </div>
+  <div class="section-title">💼 法人籌碼</div>
+  <div class="analysis">🌍 外資：連買 6 日（單日最高 1,942 張），小額但持續，外資默默佈局。<br>🚨 出場警示：✅ 持續偏多</div>
+  <div class="section-title">📰 最新新聞</div>
+  <div class="news-box">
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】中釉 2026年3月合併營收1.9億元 年增-14.75%</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】中釉代重要子公司C.G.C.DEVELOPMENT LTD.公告董事會決議不分派股利</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】中釉受邀參加福邦證券所舉辦之線上法人說明會</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】中釉因有價證券於集中市場達公布注意交易資訊標準，公布相關財務業務資訊，以利投資人區別瞭解</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】中釉董事會通過114年度合併財務報告</div>
+    
+  </div>
+</div>
+
+<div class="card" style=""
+  data-vol="2364"
+  data-ratio="1.91"
+  data-fdays="6"
+  data-price="244.5"
+  data-code="2233"
+  data-name="宇隆">
+  
+  <div class="card-header">
+    <div>
+      <span class="code">2233</span>
+      <span class="name">宇隆</span>
+      
+    </div>
+    <div class="right">
+      <span class="price">NT$ 244.5</span>
+      <span class="badge">外資✅</span>
+      <span class="warn warn-ok">✅ 持續偏多</span>
+    </div>
+  </div>
+  <div class="metrics">
+    <div class="metric"><div class="m-label">成交量</div><div class="m-val">2,364 張</div></div>
+    <div class="metric"><div class="m-label">量比</div><div class="m-val">1.91x</div></div>
+    <div class="metric"><div class="m-label">外資連買</div><div class="m-val">6 日</div></div>
+    <div class="metric"><div class="m-label">投信連買</div><div class="m-val">0 日</div></div>
+    <div class="metric"><div class="m-label">MA5</div><div class="m-val">233.2</div></div>
+    <div class="metric"><div class="m-label">MA20</div><div class="m-val">226.32</div></div>
+  </div>
+  <div class="section-title">📐 技術面解讀</div>
+  <div class="analysis">📐 均線：MA5(233.2) 高於 MA20(226.32) 6.88元（3.0%），均線多頭排列穩固，上升趨勢明確。<br>📊 MACD：MACD柱狀體強勁擴張，動能極強（柱狀體 2.2806）。<br>📦 成交量：溫和放量，穩健推升（量比 1.91x，當日 2,364 張）。</div>
+  <div class="chart-wrap">
+    <div class="chart-title">📈 近60日走勢（收盤價 / MA5 / MA20）</div>
+    <div style="position:relative;height:180px;width:100%;overflow:hidden;"><div style="position:relative;height:180px;width:100%;overflow:hidden;"><canvas id="chart-2233" class="scan-chart"></canvas></div><script id="cd-chart-2233" type="application/json">{"dates": ["01/13", "01/14", "01/15", "01/16", "01/19", "01/20", "01/21", "01/22", "01/23", "01/26", "01/27", "01/28", "01/29", "01/30", "02/02", "02/03", "02/04", "02/05", "02/06", "02/09", "02/10", "02/11", "02/23", "02/24", "02/25", "02/26", "03/02", "03/03", "03/04", "03/05", "03/06", "03/09", "03/10", "03/11", "03/12", "03/13", "03/16", "03/17", "03/18", "03/19", "03/20", "03/23", "03/24", "03/25", "03/26", "03/27", "03/30", "03/31", "04/01", "04/02", "04/07", "04/08", "04/09", "04/10", "04/13", "04/14", "04/15", "04/16", "04/17", "04/20"], "close": [242.0, 239.0, 242.0, 238.0, 232.0, 237.0, 226.0, 238.0, 234.0, 239.5, 233.5, 240.5, 264.5, 289.5, 288.5, 262.0, 255.0, 233.0, 222.0, 228.5, 223.0, 223.0, 235.5, 234.0, 229.0, 233.5, 235.5, 235.0, 223.0, 229.5, 227.0, 207.0, 211.0, 220.0, 226.0, 226.5, 233.0, 237.0, 239.0, 231.5, 235.0, 226.0, 226.5, 232.5, 232.0, 233.0, 225.5, 217.0, 225.5, 218.5, 215.0, 221.5, 212.5, 213.0, 227.0, 229.5, 229.0, 231.5, 231.5, 244.5], "ma5": [217.6, 223.6, 230.4, 236.2, 238.6, 237.6, 235.0, 234.2, 233.4, 234.9, 234.2, 237.1, 242.4, 253.5, 263.3, 269.0, 271.9, 265.6, 252.1, 240.1, 232.3, 225.9, 226.4, 228.8, 228.9, 231.0, 233.5, 233.4, 231.2, 231.3, 230.0, 224.3, 219.5, 218.9, 218.2, 218.1, 223.3, 228.5, 232.3, 233.4, 235.1, 233.7, 231.6, 230.3, 230.4, 230.0, 229.9, 228.0, 226.6, 223.9, 220.3, 219.5, 218.6, 216.1, 217.8, 220.7, 222.2, 226.0, 229.7, 233.2], "ma20": [205.78, 208.43, 211.3, 213.93, 216.45, 219.05, 220.9, 223.05, 224.65, 226.15, 226.88, 228.07, 230.35, 233.55, 237.05, 239.6, 241.9, 243.15, 243.8, 244.22, 243.28, 242.47, 242.15, 241.95, 241.8, 241.62, 242.1, 241.95, 241.4, 240.9, 240.57, 238.9, 236.22, 232.75, 229.62, 227.85, 226.75, 226.95, 227.8, 227.95, 228.55, 228.7, 228.25, 228.18, 228.32, 228.3, 227.8, 226.9, 227.03, 226.47, 225.88, 226.6, 226.68, 226.32, 226.38, 226.53, 226.32, 226.05, 225.68, 226.32], "vol": [5061, 3573, 3372, 1778, 1973, 1463, 1480, 2401, 2205, 2495, 1488, 1954, 9362, 11893, 9388, 10426, 6110, 4653, 2092, 1402, 1039, 779, 1940, 1163, 1054, 1155, 1201, 1209, 1321, 1050, 737, 1080, 440, 492, 507, 423, 727, 1498, 1931, 917, 1145, 707, 520, 545, 661, 379, 611, 562, 411, 519, 391, 303, 922, 897, 1497, 1434, 1057, 881, 442, 2364]}</script></div>
+    <div class="chart-legend">
+      <span><span class="leg-line" style="background:#2563eb;"></span>收盤價</span>
+      <span><span class="leg-line" style="background:#f59e0b;"></span>MA5</span>
+      <span><span class="leg-dash"></span>MA20</span>
+    </div>
+  </div>
+  <div class="section-title">💼 法人籌碼</div>
+  <div class="analysis">🌍 外資：連買 6 日（單日最高 659 張），小額但持續，外資默默佈局。<br>🚨 出場警示：✅ 持續偏多</div>
+  <div class="section-title">📰 最新新聞</div>
+  <div class="news-box">
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】宇隆 2026年3月合併營收3.03億元 年增2.9%</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】宇隆代重要子公司東莞信豐五金機械塑膠工業有限公司公告董事會決議通過盈餘分配案</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】宇隆 2026年2月合併營收2.38億元 年增-21.54%</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】宇隆董事會決議股利分派</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】宇隆董事會通過114年度合併財務報告</div>
+    
+  </div>
+</div>
+
+<div class="card" style=""
+  data-vol="17328"
+  data-ratio="2.58"
+  data-fdays="6"
+  data-price="68.3"
+  data-code="2436"
+  data-name="偉詮電">
+  
+  <div class="card-header">
+    <div>
+      <span class="code">2436</span>
+      <span class="name">偉詮電</span>
+      
+    </div>
+    <div class="right">
+      <span class="price">NT$ 68.3</span>
+      <span class="badge">外資✅</span>
+      <span class="warn warn-ok">✅ 持續偏多</span>
+    </div>
+  </div>
+  <div class="metrics">
+    <div class="metric"><div class="m-label">成交量</div><div class="m-val">17,328 張</div></div>
+    <div class="metric"><div class="m-label">量比</div><div class="m-val">2.58x</div></div>
+    <div class="metric"><div class="m-label">外資連買</div><div class="m-val">6 日</div></div>
+    <div class="metric"><div class="m-label">投信連買</div><div class="m-val">0 日</div></div>
+    <div class="metric"><div class="m-label">MA5</div><div class="m-val">63.72</div></div>
+    <div class="metric"><div class="m-label">MA20</div><div class="m-val">62.28</div></div>
+  </div>
+  <div class="section-title">📐 技術面解讀</div>
+  <div class="analysis">📐 均線：MA5(63.72) 高於 MA20(62.28) 1.44元（2.3%），均線多頭排列穩固，上升趨勢明確。<br>📊 MACD：MACD柱狀體剛翻正，動能初步轉強（柱狀體 0.2722）。<br>📦 成交量：明顯放量，買盤積極進場（量比 2.58x，當日 17,328 張）。</div>
+  <div class="chart-wrap">
+    <div class="chart-title">📈 近60日走勢（收盤價 / MA5 / MA20）</div>
+    <div style="position:relative;height:180px;width:100%;overflow:hidden;"><div style="position:relative;height:180px;width:100%;overflow:hidden;"><canvas id="chart-2436" class="scan-chart"></canvas></div><script id="cd-chart-2436" type="application/json">{"dates": ["01/13", "01/14", "01/15", "01/16", "01/19", "01/20", "01/21", "01/22", "01/23", "01/26", "01/27", "01/28", "01/29", "01/30", "02/02", "02/03", "02/04", "02/05", "02/06", "02/09", "02/10", "02/11", "02/23", "02/24", "02/25", "02/26", "03/02", "03/03", "03/04", "03/05", "03/06", "03/09", "03/10", "03/11", "03/12", "03/13", "03/16", "03/17", "03/18", "03/19", "03/20", "03/23", "03/24", "03/25", "03/26", "03/27", "03/30", "03/31", "04/01", "04/02", "04/07", "04/08", "04/09", "04/10", "04/13", "04/14", "04/15", "04/16", "04/17", "04/20"], "close": [47.7, 48.6, 48.8, 48.35, 49.8, 50.6, 50.0, 51.0, 51.1, 51.4, 52.8, 54.7, 54.8, 52.2, 49.0, 50.6, 52.4, 52.7, 53.5, 56.8, 58.0, 59.4, 61.2, 60.2, 59.9, 62.2, 59.8, 57.8, 54.7, 57.1, 55.4, 50.5, 53.1, 55.8, 58.8, 60.8, 63.0, 63.0, 69.3, 66.1, 65.8, 64.8, 62.8, 63.2, 60.5, 63.7, 61.5, 58.7, 61.1, 59.6, 57.9, 62.7, 61.5, 61.6, 61.6, 63.3, 60.8, 63.1, 63.1, 68.3], "ma5": [48.36, 48.12, 48.37, 48.37, 48.65, 49.23, 49.51, 49.95, 50.5, 50.82, 51.26, 52.2, 52.96, 53.18, 52.7, 52.26, 51.8, 51.38, 51.64, 53.2, 54.68, 56.08, 57.78, 59.12, 59.74, 60.58, 60.66, 59.98, 58.88, 58.32, 56.96, 55.1, 54.16, 54.38, 54.72, 55.8, 58.3, 60.28, 62.98, 64.44, 65.44, 65.8, 65.76, 64.54, 63.42, 63.0, 62.34, 61.52, 61.1, 60.92, 59.76, 60.0, 60.56, 60.66, 61.06, 62.14, 61.76, 62.08, 62.38, 63.72], "ma20": [48.25, 48.24, 48.27, 48.27, 48.39, 48.46, 48.51, 48.67, 48.84, 48.98, 49.22, 49.52, 49.87, 50.09, 50.16, 50.28, 50.41, 50.66, 50.92, 51.34, 51.86, 52.4, 53.02, 53.61, 54.12, 54.7, 55.19, 55.53, 55.71, 55.99, 56.12, 55.91, 55.83, 56.01, 56.5, 57.01, 57.54, 58.05, 58.84, 59.31, 59.7, 59.97, 60.05, 60.2, 60.23, 60.3, 60.39, 60.43, 60.75, 60.88, 61.0, 61.61, 62.03, 62.32, 62.46, 62.59, 62.48, 62.48, 62.17, 62.28], "vol": [1228, 1147, 899, 1200, 2383, 2627, 2241, 3042, 1778, 1522, 5666, 12174, 5727, 4080, 2987, 2218, 2041, 2778, 8216, 10461, 16689, 17889, 10080, 5432, 4321, 10505, 4166, 6030, 4686, 2778, 3229, 3791, 2385, 3351, 5626, 5146, 6459, 6618, 13934, 19637, 7568, 9143, 6443, 3652, 3941, 6256, 3757, 3876, 2084, 2171, 2083, 4047, 2798, 1835, 1647, 4931, 4395, 2945, 3921, 17328]}</script></div>
+    <div class="chart-legend">
+      <span><span class="leg-line" style="background:#2563eb;"></span>收盤價</span>
+      <span><span class="leg-line" style="background:#f59e0b;"></span>MA5</span>
+      <span><span class="leg-dash"></span>MA20</span>
+    </div>
+  </div>
+  <div class="section-title">💼 法人籌碼</div>
+  <div class="analysis">🌍 外資：連買 6 日（單日最高 5,916 張），中等規模，外資穩定加碼。<br>🚨 出場警示：✅ 持續偏多</div>
+  <div class="section-title">📰 最新新聞</div>
+  <div class="news-box">
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】偉詮電董事會決議通過變更獨立董事候選人名單</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】偉詮電 2026年3月合併營收3.52億元 年增25.82%</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】偉詮電受邀參加 ”群益金鼎證券法人說明會”。</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】召開偉詮電115年股東常會(更正9.召集事由五)</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】偉詮電董事會決議召開115年股東常會公告(更正9.召集事由五)</div>
+    
+  </div>
+</div>
+
+<div class="card" style=""
+  data-vol="28392"
+  data-ratio="2.47"
+  data-fdays="6"
+  data-price="24.2"
+  data-code="2401"
+  data-name="凌陽">
+  
+  <div class="card-header">
+    <div>
+      <span class="code">2401</span>
+      <span class="name">凌陽</span>
+      
+    </div>
+    <div class="right">
+      <span class="price">NT$ 24.2</span>
+      <span class="badge">外資✅</span>
+      <span class="warn warn-ok">✅ 持續偏多</span>
+    </div>
+  </div>
+  <div class="metrics">
+    <div class="metric"><div class="m-label">成交量</div><div class="m-val">28,392 張</div></div>
+    <div class="metric"><div class="m-label">量比</div><div class="m-val">2.47x</div></div>
+    <div class="metric"><div class="m-label">外資連買</div><div class="m-val">6 日</div></div>
+    <div class="metric"><div class="m-label">投信連買</div><div class="m-val">0 日</div></div>
+    <div class="metric"><div class="m-label">MA5</div><div class="m-val">23.02</div></div>
+    <div class="metric"><div class="m-label">MA20</div><div class="m-val">20.93</div></div>
+  </div>
+  <div class="section-title">📐 技術面解讀</div>
+  <div class="analysis">📐 均線：MA5(23.02) 高於 MA20(20.93) 2.09元（10.0%），均線強勢擴張，多頭格局確立。<br>📊 MACD：MACD柱狀體剛翻正，動能初步轉強（柱狀體 0.4994）。<br>📦 成交量：明顯放量，買盤積極進場（量比 2.47x，當日 28,392 張）。</div>
+  <div class="chart-wrap">
+    <div class="chart-title">📈 近60日走勢（收盤價 / MA5 / MA20）</div>
+    <div style="position:relative;height:180px;width:100%;overflow:hidden;"><div style="position:relative;height:180px;width:100%;overflow:hidden;"><canvas id="chart-2401" class="scan-chart"></canvas></div><script id="cd-chart-2401" type="application/json">{"dates": ["01/13", "01/14", "01/15", "01/16", "01/19", "01/20", "01/21", "01/22", "01/23", "01/26", "01/27", "01/28", "01/29", "01/30", "02/02", "02/03", "02/04", "02/05", "02/06", "02/09", "02/10", "02/11", "02/23", "02/24", "02/25", "02/26", "03/02", "03/03", "03/04", "03/05", "03/06", "03/09", "03/10", "03/11", "03/12", "03/13", "03/16", "03/17", "03/18", "03/19", "03/20", "03/23", "03/24", "03/25", "03/26", "03/27", "03/30", "03/31", "04/01", "04/02", "04/07", "04/08", "04/09", "04/10", "04/13", "04/14", "04/15", "04/16", "04/17", "04/20"], "close": [21.0, 21.85, 21.45, 21.75, 23.1, 22.7, 22.45, 22.75, 22.45, 23.0, 23.15, 22.9, 22.4, 22.0, 21.0, 21.55, 21.8, 21.95, 21.15, 20.9, 21.2, 21.5, 22.9, 23.65, 22.6, 23.15, 22.8, 22.2, 20.5, 21.55, 21.65, 20.25, 20.4, 21.4, 21.3, 20.9, 20.5, 21.2, 21.15, 20.9, 21.2, 20.5, 20.45, 20.75, 20.45, 20.7, 20.1, 19.5, 19.9, 19.6, 19.35, 20.05, 20.05, 19.75, 21.05, 21.95, 22.6, 22.7, 23.65, 24.2], "ma5": [20.75, 20.85, 21.05, 21.35, 21.83, 22.17, 22.29, 22.55, 22.69, 22.67, 22.76, 22.85, 22.78, 22.69, 22.29, 21.97, 21.75, 21.66, 21.49, 21.47, 21.4, 21.34, 21.53, 22.03, 22.37, 22.76, 23.02, 22.88, 22.25, 22.04, 21.74, 21.23, 20.87, 21.05, 21.0, 20.85, 20.9, 21.06, 21.01, 20.93, 20.99, 20.99, 20.84, 20.76, 20.67, 20.57, 20.49, 20.3, 20.13, 19.96, 19.69, 19.68, 19.79, 19.76, 20.05, 20.57, 21.08, 21.61, 22.39, 23.02], "ma20": [20.41, 20.47, 20.5, 20.57, 20.71, 20.83, 20.91, 21.03, 21.16, 21.3, 21.45, 21.59, 21.71, 21.8, 21.86, 21.91, 21.94, 22.01, 22.06, 22.07, 22.08, 22.06, 22.13, 22.23, 22.2, 22.22, 22.24, 22.21, 22.11, 22.04, 21.97, 21.83, 21.73, 21.7, 21.72, 21.69, 21.62, 21.58, 21.58, 21.58, 21.58, 21.53, 21.41, 21.27, 21.16, 21.04, 20.9, 20.77, 20.74, 20.64, 20.53, 20.52, 20.5, 20.42, 20.4, 20.46, 20.56, 20.64, 20.76, 20.93], "vol": [3947, 5624, 3671, 6098, 10678, 5601, 3889, 6615, 4296, 3509, 4588, 3841, 3544, 2828, 2546, 1942, 1750, 2426, 2008, 2318, 1500, 2141, 6729, 9440, 5929, 3037, 2800, 2887, 4540, 2889, 1437, 3370, 1415, 2054, 1895, 1861, 2354, 2813, 2844, 1941, 3741, 2268, 2505, 1714, 2039, 2049, 1681, 3006, 1565, 1619, 1264, 1725, 1375, 1997, 4797, 5593, 6187, 3563, 13824, 28392]}</script></div>
+    <div class="chart-legend">
+      <span><span class="leg-line" style="background:#2563eb;"></span>收盤價</span>
+      <span><span class="leg-line" style="background:#f59e0b;"></span>MA5</span>
+      <span><span class="leg-dash"></span>MA20</span>
+    </div>
+  </div>
+  <div class="section-title">💼 法人籌碼</div>
+  <div class="analysis">🌍 外資：連買 6 日（單日最高 5,259 張），中等規模，外資穩定加碼。<br>🚨 出場警示：✅ 持續偏多</div>
+  <div class="section-title">📰 最新新聞</div>
+  <div class="news-box">
+    
+    <div class="news-item">📰 [Yahoo股市] 證交所：凌陽創新科技送件申請上市　今年第4家</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】凌陽 2026年3月合併營收7.25億元 年增22.14%</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】凌陽創新 2026年3月合併營收2.35億元 年增40.06%</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 凌陽轉嫁部分記憶體成本，Q1營運可望優於去年</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】凌陽代子公司凌陽創業投資(股)公司公告預計參與喬鼎資訊(股)公司私募案</div>
+    
+  </div>
+</div>
+
+<div class="card" style=""
+  data-vol="19305"
+  data-ratio="1.92"
+  data-fdays="6"
+  data-price="86.9"
+  data-code="2464"
+  data-name="盟立">
+  
+  <div class="card-header">
+    <div>
+      <span class="code">2464</span>
+      <span class="name">盟立</span>
+      
+    </div>
+    <div class="right">
+      <span class="price">NT$ 86.9</span>
+      <span class="badge">外資✅</span>
+      <span class="warn warn-ok">✅ 持續偏多</span>
+    </div>
+  </div>
+  <div class="metrics">
+    <div class="metric"><div class="m-label">成交量</div><div class="m-val">19,305 張</div></div>
+    <div class="metric"><div class="m-label">量比</div><div class="m-val">1.92x</div></div>
+    <div class="metric"><div class="m-label">外資連買</div><div class="m-val">6 日</div></div>
+    <div class="metric"><div class="m-label">投信連買</div><div class="m-val">0 日</div></div>
+    <div class="metric"><div class="m-label">MA5</div><div class="m-val">77.74</div></div>
+    <div class="metric"><div class="m-label">MA20</div><div class="m-val">71.99</div></div>
+  </div>
+  <div class="section-title">📐 技術面解讀</div>
+  <div class="analysis">📐 均線：MA5(77.74) 高於 MA20(71.99) 5.75元（8.0%），均線強勢擴張，多頭格局確立。<br>📊 MACD：MACD柱狀體持續上揚，動能健康（柱狀體 1.5352）。<br>📦 成交量：溫和放量，穩健推升（量比 1.92x，當日 19,305 張）。</div>
+  <div class="chart-wrap">
+    <div class="chart-title">📈 近60日走勢（收盤價 / MA5 / MA20）</div>
+    <div style="position:relative;height:180px;width:100%;overflow:hidden;"><div style="position:relative;height:180px;width:100%;overflow:hidden;"><canvas id="chart-2464" class="scan-chart"></canvas></div><script id="cd-chart-2464" type="application/json">{"dates": ["01/13", "01/14", "01/15", "01/16", "01/19", "01/20", "01/21", "01/22", "01/23", "01/26", "01/27", "01/28", "01/29", "01/30", "02/02", "02/03", "02/04", "02/05", "02/06", "02/09", "02/10", "02/11", "02/23", "02/24", "02/25", "02/26", "03/02", "03/03", "03/04", "03/05", "03/06", "03/09", "03/10", "03/11", "03/12", "03/13", "03/16", "03/17", "03/18", "03/19", "03/20", "03/23", "03/24", "03/25", "03/26", "03/27", "03/30", "03/31", "04/01", "04/02", "04/07", "04/08", "04/09", "04/10", "04/13", "04/14", "04/15", "04/16", "04/17", "04/20"], "close": [64.0, 67.9, 66.8, 66.9, 68.6, 68.1, 66.7, 67.1, 69.3, 70.5, 68.8, 69.5, 70.8, 68.0, 63.9, 69.4, 72.0, 69.0, 71.5, 74.6, 72.0, 71.1, 72.8, 73.1, 71.2, 74.7, 74.3, 71.9, 66.9, 68.3, 67.8, 63.5, 67.3, 69.2, 68.4, 70.9, 77.7, 79.1, 79.6, 77.0, 74.5, 72.5, 72.0, 74.4, 72.3, 71.9, 71.0, 67.4, 68.1, 66.5, 65.8, 68.0, 67.7, 68.9, 70.1, 75.1, 74.3, 73.4, 79.0, 86.9], "ma5": [65.96, 65.74, 65.98, 66.28, 66.84, 67.66, 67.42, 67.48, 67.96, 68.34, 68.48, 69.04, 69.78, 69.52, 68.2, 68.32, 68.82, 68.46, 69.16, 71.3, 71.82, 71.64, 72.4, 72.72, 72.04, 72.58, 73.22, 73.04, 71.8, 71.22, 69.84, 67.68, 66.76, 67.22, 67.24, 67.86, 70.7, 73.06, 75.14, 76.86, 77.58, 76.54, 75.12, 74.08, 73.14, 72.62, 72.32, 71.4, 70.14, 68.98, 67.76, 67.16, 67.22, 67.38, 68.1, 69.96, 71.22, 72.36, 74.38, 77.74], "ma20": [63.36, 63.76, 64.15, 64.4, 64.86, 65.27, 65.49, 65.75, 66.12, 66.54, 66.82, 67.12, 67.57, 67.79, 67.64, 67.61, 67.76, 67.93, 68.23, 68.67, 69.07, 69.23, 69.53, 69.84, 69.97, 70.3, 70.68, 70.92, 70.8, 70.69, 70.64, 70.34, 70.17, 70.23, 70.45, 70.53, 70.81, 71.32, 71.72, 71.84, 71.97, 72.04, 72.0, 72.06, 72.12, 71.98, 71.81, 71.59, 71.65, 71.56, 71.46, 71.68, 71.7, 71.69, 71.77, 71.98, 71.81, 71.53, 71.5, 71.99], "vol": [1910, 3974, 2148, 3440, 4100, 6059, 3178, 2059, 6566, 17931, 4109, 2368, 7116, 7538, 2870, 6585, 17892, 6706, 20561, 39864, 14574, 5231, 7985, 8080, 5745, 14525, 6235, 7831, 4995, 2504, 1433, 2778, 2344, 1858, 1877, 2710, 15042, 19825, 19779, 5984, 5224, 3793, 3469, 2498, 3142, 5118, 2399, 2802, 1656, 1855, 1729, 1813, 2155, 2382, 3234, 7621, 5893, 4951, 12398, 19305]}</script></div>
+    <div class="chart-legend">
+      <span><span class="leg-line" style="background:#2563eb;"></span>收盤價</span>
+      <span><span class="leg-line" style="background:#f59e0b;"></span>MA5</span>
+      <span><span class="leg-dash"></span>MA20</span>
+    </div>
+  </div>
+  <div class="section-title">💼 法人籌碼</div>
+  <div class="analysis">🌍 外資：連買 6 日（單日最高 7,095 張），中等規模，外資穩定加碼。<br>🚨 出場警示：✅ 持續偏多</div>
+  <div class="section-title">📰 最新新聞</div>
+  <div class="news-box">
+    
+    <div class="news-item">📰 [Yahoo股市] 盟立與精確成立合資公司　搶攻智慧自動化與機器人</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】盟立董事會通過與精確實業股份有限公司(股票代號:3162)合資設立新公司</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】盟立 2026年3月合併營收6.52億元 年增7.97%</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】盟立限制員工權利新股註銷減資變更登記完成</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】盟立董事會決議發行限制員工權利新股案</div>
+    
+  </div>
+</div>
+
+<div class="card" style=""
+  data-vol="22915"
+  data-ratio="2.7"
+  data-fdays="6"
+  data-price="49.9"
+  data-code="2338"
+  data-name="光罩">
+  
+  <div class="card-header">
+    <div>
+      <span class="code">2338</span>
+      <span class="name">光罩</span>
+      
+    </div>
+    <div class="right">
+      <span class="price">NT$ 49.9</span>
+      <span class="badge">外資✅</span>
+      <span class="warn warn-ok">✅ 持續偏多</span>
+    </div>
+  </div>
+  <div class="metrics">
+    <div class="metric"><div class="m-label">成交量</div><div class="m-val">22,915 張</div></div>
+    <div class="metric"><div class="m-label">量比</div><div class="m-val">2.7x</div></div>
+    <div class="metric"><div class="m-label">外資連買</div><div class="m-val">6 日</div></div>
+    <div class="metric"><div class="m-label">投信連買</div><div class="m-val">0 日</div></div>
+    <div class="metric"><div class="m-label">MA5</div><div class="m-val">47.45</div></div>
+    <div class="metric"><div class="m-label">MA20</div><div class="m-val">46.13</div></div>
+  </div>
+  <div class="section-title">📐 技術面解讀</div>
+  <div class="analysis">📐 均線：MA5(47.45) 高於 MA20(46.13) 1.32元（2.9%），均線多頭排列穩固，上升趨勢明確。<br>📊 MACD：MACD柱狀體剛翻正，動能初步轉強（柱狀體 0.3825）。<br>📦 成交量：明顯放量，買盤積極進場（量比 2.7x，當日 22,915 張）。</div>
+  <div class="chart-wrap">
+    <div class="chart-title">📈 近60日走勢（收盤價 / MA5 / MA20）</div>
+    <div style="position:relative;height:180px;width:100%;overflow:hidden;"><div style="position:relative;height:180px;width:100%;overflow:hidden;"><canvas id="chart-2338" class="scan-chart"></canvas></div><script id="cd-chart-2338" type="application/json">{"dates": ["01/13", "01/14", "01/15", "01/16", "01/19", "01/20", "01/21", "01/22", "01/23", "01/26", "01/27", "01/28", "01/29", "01/30", "02/02", "02/03", "02/04", "02/05", "02/06", "02/09", "02/10", "02/11", "02/23", "02/24", "02/25", "02/26", "03/02", "03/03", "03/04", "03/05", "03/06", "03/09", "03/10", "03/11", "03/12", "03/13", "03/16", "03/17", "03/18", "03/19", "03/20", "03/23", "03/24", "03/25", "03/26", "03/27", "03/30", "03/31", "04/01", "04/02", "04/07", "04/08", "04/09", "04/10", "04/13", "04/14", "04/15", "04/16", "04/17", "04/20"], "close": [37.7, 38.8, 38.7, 39.95, 41.7, 41.55, 41.9, 41.9, 40.1, 40.15, 41.85, 42.4, 40.0, 39.0, 36.64, 37.97, 37.28, 36.54, 35.06, 34.75, 33.95, 33.65, 37.0, 40.7, 44.75, 49.2, 54.1, 53.9, 48.65, 52.7, 52.8, 47.55, 44.4, 48.8, 49.5, 50.0, 50.6, 51.0, 56.1, 53.5, 50.6, 46.0, 46.05, 48.8, 46.3, 47.0, 45.5, 43.3, 43.45, 43.25, 43.6, 45.15, 45.35, 46.35, 44.7, 45.7, 44.4, 46.35, 50.9, 49.9], "ma5": [37.68, 37.65, 37.96, 38.56, 39.37, 40.14, 40.76, 41.4, 41.43, 41.12, 41.18, 41.28, 40.9, 40.68, 39.98, 39.2, 38.18, 37.49, 36.7, 36.32, 35.52, 34.79, 34.88, 36.01, 38.01, 41.06, 45.15, 48.53, 50.12, 51.71, 52.43, 51.12, 49.22, 49.25, 48.61, 48.05, 48.66, 49.98, 51.44, 52.24, 52.36, 51.44, 50.45, 48.99, 47.55, 46.83, 46.73, 46.18, 45.11, 44.5, 43.82, 43.75, 44.16, 44.74, 45.03, 45.45, 45.3, 45.5, 46.41, 47.45], "ma20": [36.19, 36.3, 36.5, 36.8, 37.19, 37.5, 37.81, 38.04, 38.23, 38.43, 38.72, 39.04, 39.27, 39.42, 39.48, 39.55, 39.47, 39.44, 39.34, 39.2, 39.01, 38.75, 38.67, 38.7, 38.86, 39.24, 39.85, 40.45, 40.88, 41.5, 42.05, 42.31, 42.53, 43.02, 43.66, 44.26, 44.93, 45.65, 46.71, 47.64, 48.48, 49.09, 49.54, 49.95, 50.03, 49.92, 49.49, 48.96, 48.7, 48.22, 47.76, 47.64, 47.69, 47.57, 47.33, 47.11, 46.8, 46.57, 46.31, 46.13], "vol": [1182, 3116, 1266, 5077, 5643, 2613, 3253, 4776, 2806, 2144, 2916, 4087, 2976, 1924, 2035, 1164, 1069, 1057, 1611, 2576, 2182, 1362, 4075, 2467, 3479, 7118, 15186, 31955, 4964, 4048, 2547, 1411, 4637, 4184, 2649, 1718, 1711, 2426, 8494, 32883, 15557, 6680, 7801, 6590, 4971, 3544, 1983, 2611, 2561, 3295, 1886, 3667, 2926, 6143, 3190, 3448, 2788, 4163, 9175, 22915]}</script></div>
+    <div class="chart-legend">
+      <span><span class="leg-line" style="background:#2563eb;"></span>收盤價</span>
+      <span><span class="leg-line" style="background:#f59e0b;"></span>MA5</span>
+      <span><span class="leg-dash"></span>MA20</span>
+    </div>
+  </div>
+  <div class="section-title">💼 法人籌碼</div>
+  <div class="analysis">🌍 外資：連買 6 日（單日最高 4,537 張），中等規模，外資穩定加碼。<br>🚨 出場警示：✅ 持續偏多</div>
+  <div class="section-title">📰 最新新聞</div>
+  <div class="news-box">
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】光罩114年度現金增資股款催繳期間屆滿暨催繳股數發放事宜</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】光罩 2026年3月合併營收5.43億元 年增-0.52%</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】光罩董事會決議召開115年股東常會相關事宜</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】光罩董事會決議通過：剩餘期限不繼續辦理114年股東常會通過，未執行之私募有價證券案。</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】光罩114年現金增資收足股款暨增資基準日</div>
+    
+  </div>
+</div>
+
+<div class="card" style=""
+  data-vol="1775"
+  data-ratio="1.72"
+  data-fdays="6"
+  data-price="70.6"
+  data-code="3022"
+  data-name="威強電">
+  
+  <div class="card-header">
+    <div>
+      <span class="code">3022</span>
+      <span class="name">威強電</span>
+      
+    </div>
+    <div class="right">
+      <span class="price">NT$ 70.6</span>
+      <span class="badge">外資✅</span>
+      <span class="warn warn-ok">✅ 持續偏多</span>
+    </div>
+  </div>
+  <div class="metrics">
+    <div class="metric"><div class="m-label">成交量</div><div class="m-val">1,775 張</div></div>
+    <div class="metric"><div class="m-label">量比</div><div class="m-val">1.72x</div></div>
+    <div class="metric"><div class="m-label">外資連買</div><div class="m-val">6 日</div></div>
+    <div class="metric"><div class="m-label">投信連買</div><div class="m-val">0 日</div></div>
+    <div class="metric"><div class="m-label">MA5</div><div class="m-val">68.6</div></div>
+    <div class="metric"><div class="m-label">MA20</div><div class="m-val">64.63</div></div>
+  </div>
+  <div class="section-title">📐 技術面解讀</div>
+  <div class="analysis">📐 均線：MA5(68.6) 高於 MA20(64.63) 3.97元（6.1%），均線強勢擴張，多頭格局確立。<br>📊 MACD：MACD柱狀體持續上揚，動能健康（柱狀體 0.7814）。<br>📦 成交量：溫和放量，穩健推升（量比 1.72x，當日 1,775 張）。</div>
+  <div class="chart-wrap">
+    <div class="chart-title">📈 近60日走勢（收盤價 / MA5 / MA20）</div>
+    <div style="position:relative;height:180px;width:100%;overflow:hidden;"><div style="position:relative;height:180px;width:100%;overflow:hidden;"><canvas id="chart-3022" class="scan-chart"></canvas></div><script id="cd-chart-3022" type="application/json">{"dates": ["01/13", "01/14", "01/15", "01/16", "01/19", "01/20", "01/21", "01/22", "01/23", "01/26", "01/27", "01/28", "01/29", "01/30", "02/02", "02/03", "02/04", "02/05", "02/06", "02/09", "02/10", "02/11", "02/23", "02/24", "02/25", "02/26", "03/02", "03/03", "03/04", "03/05", "03/06", "03/09", "03/10", "03/11", "03/12", "03/13", "03/16", "03/17", "03/18", "03/19", "03/20", "03/23", "03/24", "03/25", "03/26", "03/27", "03/30", "03/31", "04/01", "04/02", "04/07", "04/08", "04/09", "04/10", "04/13", "04/14", "04/15", "04/16", "04/17", "04/20"], "close": [66.5, 67.9, 67.8, 68.1, 68.5, 67.8, 66.7, 67.6, 66.8, 66.7, 65.8, 65.6, 64.9, 64.0, 63.8, 64.0, 64.8, 64.1, 62.8, 60.5, 60.5, 60.7, 60.5, 59.8, 60.1, 60.1, 60.7, 59.1, 56.2, 59.2, 58.9, 58.7, 61.2, 62.0, 60.6, 61.0, 61.2, 62.0, 62.3, 68.5, 68.5, 64.0, 62.7, 63.5, 62.6, 62.6, 61.4, 60.7, 61.4, 62.1, 60.8, 62.2, 62.5, 66.6, 67.9, 67.6, 67.4, 68.4, 69.0, 70.6], "ma5": [65.58, 66.36, 67.02, 67.62, 67.76, 68.02, 67.78, 67.74, 67.48, 67.12, 66.72, 66.5, 65.96, 65.4, 64.82, 64.46, 64.3, 64.14, 63.9, 63.24, 62.54, 61.72, 61.0, 60.4, 60.32, 60.24, 60.24, 59.96, 59.24, 59.06, 58.82, 58.42, 58.84, 60.0, 60.28, 60.7, 61.2, 61.36, 61.42, 63.0, 64.5, 65.06, 65.2, 65.44, 64.26, 63.08, 62.56, 62.16, 61.74, 61.64, 61.28, 61.44, 61.8, 62.84, 64.0, 65.36, 66.4, 67.58, 68.06, 68.6], "ma20": [65.44, 65.53, 65.62, 65.71, 65.79, 65.75, 65.71, 65.83, 65.96, 66.1, 66.15, 66.18, 66.2, 66.15, 66.15, 66.2, 66.24, 66.22, 66.1, 65.74, 65.44, 65.08, 64.71, 64.3, 63.88, 63.49, 63.19, 62.76, 62.23, 61.86, 61.51, 61.17, 60.99, 60.89, 60.73, 60.58, 60.39, 60.29, 60.26, 60.66, 61.06, 61.23, 61.34, 61.52, 61.65, 61.77, 61.81, 61.89, 62.15, 62.3, 62.39, 62.56, 62.63, 62.86, 63.23, 63.55, 63.86, 64.19, 64.52, 64.63], "vol": [694, 631, 332, 902, 938, 499, 620, 356, 456, 467, 537, 521, 582, 1757, 415, 304, 237, 362, 606, 1630, 671, 509, 472, 877, 382, 433, 477, 616, 783, 635, 235, 1587, 738, 623, 507, 321, 638, 653, 484, 2193, 6789, 1341, 855, 583, 709, 454, 556, 640, 642, 835, 727, 542, 499, 2604, 1247, 994, 755, 945, 696, 1775]}</script></div>
+    <div class="chart-legend">
+      <span><span class="leg-line" style="background:#2563eb;"></span>收盤價</span>
+      <span><span class="leg-line" style="background:#f59e0b;"></span>MA5</span>
+      <span><span class="leg-dash"></span>MA20</span>
+    </div>
+  </div>
+  <div class="section-title">💼 法人籌碼</div>
+  <div class="analysis">🌍 外資：連買 6 日（單日最高 610 張），小額但持續，外資默默佈局。<br>🚨 出場警示：✅ 持續偏多</div>
+  <div class="section-title">📰 最新新聞</div>
+  <div class="news-box">
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】威強電董事會通過子公司功能性貨幣變更案</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】威強電 2026年3月合併營收7.29億元 年增9.71%</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】補充公告桃園廠興建工程相關事宜-營造工程發包</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】威強電受邀參加凱基證券舉辦之法人說明會</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】威強電 2026年2月合併營收4.09億元 年增-30.54%</div>
+    
+  </div>
+</div>
+
+<div class="card" style=""
+  data-vol="2471"
+  data-ratio="1.53"
+  data-fdays="6"
+  data-price="31.3"
+  data-code="2342"
+  data-name="茂矽">
+  
+  <div class="card-header">
+    <div>
+      <span class="code">2342</span>
+      <span class="name">茂矽</span>
+      
+    </div>
+    <div class="right">
+      <span class="price">NT$ 31.3</span>
+      <span class="badge">外資✅</span>
+      <span class="warn warn-ok">✅ 持續偏多</span>
+    </div>
+  </div>
+  <div class="metrics">
+    <div class="metric"><div class="m-label">成交量</div><div class="m-val">2,471 張</div></div>
+    <div class="metric"><div class="m-label">量比</div><div class="m-val">1.53x</div></div>
+    <div class="metric"><div class="m-label">外資連買</div><div class="m-val">6 日</div></div>
+    <div class="metric"><div class="m-label">投信連買</div><div class="m-val">0 日</div></div>
+    <div class="metric"><div class="m-label">MA5</div><div class="m-val">30.18</div></div>
+    <div class="metric"><div class="m-label">MA20</div><div class="m-val">29.87</div></div>
+  </div>
+  <div class="section-title">📐 技術面解讀</div>
+  <div class="analysis">📐 均線：MA5(30.18) 高於 MA20(29.87) 0.31元（1.0%），黃金交叉剛形成，趨勢轉強初期。<br>📊 MACD：MACD柱狀體剛翻正，動能初步轉強（柱狀體 0.2569）。<br>📦 成交量：溫和放量，穩健推升（量比 1.53x，當日 2,471 張）。</div>
+  <div class="chart-wrap">
+    <div class="chart-title">📈 近60日走勢（收盤價 / MA5 / MA20）</div>
+    <div style="position:relative;height:180px;width:100%;overflow:hidden;"><div style="position:relative;height:180px;width:100%;overflow:hidden;"><canvas id="chart-2342" class="scan-chart"></canvas></div><script id="cd-chart-2342" type="application/json">{"dates": ["01/13", "01/14", "01/15", "01/16", "01/19", "01/20", "01/21", "01/22", "01/23", "01/26", "01/27", "01/28", "01/29", "01/30", "02/02", "02/03", "02/04", "02/05", "02/06", "02/09", "02/10", "02/11", "02/23", "02/24", "02/25", "02/26", "03/02", "03/03", "03/04", "03/05", "03/06", "03/09", "03/10", "03/11", "03/12", "03/13", "03/16", "03/17", "03/18", "03/19", "03/20", "03/23", "03/24", "03/25", "03/26", "03/27", "03/30", "03/31", "04/01", "04/02", "04/07", "04/08", "04/09", "04/10", "04/13", "04/14", "04/15", "04/16", "04/17", "04/20"], "close": [32.3, 34.2, 33.4, 33.85, 35.65, 36.75, 37.8, 38.95, 35.55, 35.25, 34.45, 35.35, 33.6, 32.9, 31.8, 32.05, 32.45, 31.85, 31.0, 30.85, 30.9, 30.5, 31.2, 32.4, 31.65, 33.5, 32.8, 31.15, 28.8, 30.3, 30.2, 28.65, 29.4, 31.05, 31.3, 30.75, 32.5, 32.45, 33.9, 33.0, 32.3, 31.0, 31.1, 31.15, 30.85, 30.0, 29.05, 28.1, 28.8, 28.0, 28.7, 29.8, 29.35, 29.3, 29.1, 29.4, 29.65, 30.05, 30.5, 31.3], "ma5": [33.48, 33.09, 33.03, 33.32, 33.88, 34.77, 35.49, 36.6, 36.94, 36.86, 36.4, 35.91, 34.84, 34.31, 33.62, 33.14, 32.56, 32.21, 31.83, 31.64, 31.41, 31.02, 30.89, 31.17, 31.33, 31.85, 32.31, 32.3, 31.58, 31.31, 30.65, 29.82, 29.47, 29.92, 30.12, 30.23, 31.0, 31.61, 32.18, 32.52, 32.83, 32.53, 32.26, 31.71, 31.28, 30.82, 30.43, 29.83, 29.36, 28.79, 28.53, 28.68, 28.93, 29.03, 29.25, 29.39, 29.36, 29.5, 29.74, 30.18], "ma20": [30.31, 30.58, 30.83, 31.07, 31.42, 31.83, 32.26, 32.75, 33.09, 33.4, 33.67, 33.99, 34.25, 34.4, 34.49, 34.45, 34.26, 34.17, 34.1, 34.0, 33.93, 33.74, 33.63, 33.56, 33.36, 33.2, 32.95, 32.56, 32.22, 31.97, 31.76, 31.43, 31.22, 31.12, 31.1, 31.03, 31.04, 31.07, 31.21, 31.32, 31.39, 31.41, 31.41, 31.35, 31.31, 31.13, 30.94, 30.79, 30.79, 30.68, 30.6, 30.66, 30.66, 30.57, 30.46, 30.39, 30.25, 30.13, 29.96, 29.87], "vol": [2980, 5874, 2524, 4950, 8325, 10519, 40692, 19446, 8924, 5853, 3347, 3983, 4081, 3257, 2364, 2066, 1295, 1145, 1297, 1187, 1502, 1167, 1032, 1759, 1511, 3846, 1758, 2538, 2422, 1605, 1022, 1365, 1163, 1386, 1406, 975, 2560, 2100, 4726, 3415, 1531, 1193, 1228, 1055, 1333, 1309, 900, 1218, 513, 864, 911, 1263, 754, 697, 629, 1426, 1346, 1109, 1704, 2471]}</script></div>
+    <div class="chart-legend">
+      <span><span class="leg-line" style="background:#2563eb;"></span>收盤價</span>
+      <span><span class="leg-line" style="background:#f59e0b;"></span>MA5</span>
+      <span><span class="leg-dash"></span>MA20</span>
+    </div>
+  </div>
+  <div class="section-title">💼 法人籌碼</div>
+  <div class="analysis">🌍 外資：連買 6 日（單日最高 847 張），小額但持續，外資默默佈局。<br>🚨 出場警示：✅ 持續偏多</div>
+  <div class="section-title">📰 最新新聞</div>
+  <div class="news-box">
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】茂矽 2026年3月合併營收1.65億元 年增-10.78%</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】茂矽 2026年2月合併營收1.55億元 年增-15.28%</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】茂矽114年度合併財務報告業經董事會決議通過</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】茂矽董事會決議下半年度不分派股利</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】茂矽董事會決議召集115年股東常會相關事宜</div>
+    
+  </div>
+</div>
+
+<div class="card" style=""
+  data-vol="14323"
+  data-ratio="2.33"
+  data-fdays="6"
+  data-price="174.5"
+  data-code="3035"
+  data-name="智原">
+  
+  <div class="card-header">
+    <div>
+      <span class="code">3035</span>
+      <span class="name">智原</span>
+      
+    </div>
+    <div class="right">
+      <span class="price">NT$ 174.5</span>
+      <span class="badge">外資✅</span>
+      <span class="warn warn-ok">✅ 持續偏多</span>
+    </div>
+  </div>
+  <div class="metrics">
+    <div class="metric"><div class="m-label">成交量</div><div class="m-val">14,323 張</div></div>
+    <div class="metric"><div class="m-label">量比</div><div class="m-val">2.33x</div></div>
+    <div class="metric"><div class="m-label">外資連買</div><div class="m-val">6 日</div></div>
+    <div class="metric"><div class="m-label">投信連買</div><div class="m-val">0 日</div></div>
+    <div class="metric"><div class="m-label">MA5</div><div class="m-val">158.5</div></div>
+    <div class="metric"><div class="m-label">MA20</div><div class="m-val">150.7</div></div>
+  </div>
+  <div class="section-title">📐 技術面解讀</div>
+  <div class="analysis">📐 均線：MA5(158.5) 高於 MA20(150.7) 7.8元（5.2%），均線強勢擴張，多頭格局確立。<br>📊 MACD：MACD柱狀體強勁擴張，動能極強（柱狀體 2.9159）。<br>📦 成交量：明顯放量，買盤積極進場（量比 2.33x，當日 14,323 張）。</div>
+  <div class="chart-wrap">
+    <div class="chart-title">📈 近60日走勢（收盤價 / MA5 / MA20）</div>
+    <div style="position:relative;height:180px;width:100%;overflow:hidden;"><div style="position:relative;height:180px;width:100%;overflow:hidden;"><canvas id="chart-3035" class="scan-chart"></canvas></div><script id="cd-chart-3035" type="application/json">{"dates": ["01/13", "01/14", "01/15", "01/16", "01/19", "01/20", "01/21", "01/22", "01/23", "01/26", "01/27", "01/28", "01/29", "01/30", "02/02", "02/03", "02/04", "02/05", "02/06", "02/09", "02/10", "02/11", "02/23", "02/24", "02/25", "02/26", "03/02", "03/03", "03/04", "03/05", "03/06", "03/09", "03/10", "03/11", "03/12", "03/13", "03/16", "03/17", "03/18", "03/19", "03/20", "03/23", "03/24", "03/25", "03/26", "03/27", "03/30", "03/31", "04/01", "04/02", "04/07", "04/08", "04/09", "04/10", "04/13", "04/14", "04/15", "04/16", "04/17", "04/20"], "close": [167.5, 170.0, 168.0, 166.5, 172.0, 172.5, 171.0, 172.0, 173.0, 174.5, 178.5, 177.0, 171.5, 167.0, 160.0, 161.5, 163.5, 162.0, 160.0, 157.0, 169.0, 162.0, 166.5, 166.5, 167.5, 168.0, 166.5, 164.5, 158.0, 159.0, 158.5, 144.0, 146.0, 154.0, 153.5, 151.5, 155.5, 159.0, 164.0, 160.5, 157.5, 151.0, 148.0, 151.5, 151.0, 150.5, 146.5, 141.0, 144.5, 139.0, 140.0, 150.5, 152.0, 149.5, 149.0, 153.0, 149.5, 156.5, 159.0, 174.5], "ma5": [170.6, 169.2, 168.7, 168.5, 168.8, 169.8, 170.0, 170.8, 172.1, 172.6, 173.8, 175.0, 174.9, 173.7, 170.8, 167.4, 164.7, 162.8, 161.4, 160.8, 162.3, 162.0, 162.9, 164.2, 166.3, 166.1, 167.0, 166.6, 164.9, 163.2, 161.3, 156.8, 153.1, 152.3, 151.2, 149.8, 152.1, 154.7, 156.7, 158.1, 159.3, 158.4, 156.2, 153.7, 151.8, 150.4, 149.5, 148.1, 146.7, 144.3, 142.2, 143.0, 145.2, 146.2, 148.2, 150.8, 150.6, 151.5, 153.4, 158.5], "ma20": [168.5, 168.53, 168.32, 168.2, 168.4, 168.72, 169.0, 169.4, 169.82, 170.3, 171.0, 171.43, 171.47, 171.3, 170.88, 170.4, 169.72, 169.3, 168.93, 168.25, 168.32, 167.93, 167.85, 167.85, 167.62, 167.4, 167.18, 166.8, 166.05, 165.28, 164.28, 162.62, 161.35, 160.7, 160.38, 159.88, 159.47, 159.32, 159.53, 159.7, 159.12, 158.57, 157.65, 156.9, 156.07, 155.2, 154.2, 153.03, 152.35, 151.35, 150.43, 150.75, 151.05, 150.82, 150.6, 150.68, 150.38, 150.25, 150.0, 150.7], "vol": [2207, 1736, 1903, 2259, 5424, 2628, 3441, 3938, 5232, 2740, 7450, 5584, 4391, 4233, 3880, 1420, 967, 1801, 1780, 2985, 5521, 6021, 3738, 2855, 2738, 5907, 2047, 4744, 4113, 2104, 1365, 4060, 1820, 2361, 2230, 1462, 2180, 2479, 3970, 1928, 2271, 1497, 1710, 856, 2089, 1965, 2267, 2689, 1156, 1852, 1188, 2284, 2190, 1704, 1368, 2194, 3467, 5653, 5159, 14323]}</script></div>
+    <div class="chart-legend">
+      <span><span class="leg-line" style="background:#2563eb;"></span>收盤價</span>
+      <span><span class="leg-line" style="background:#f59e0b;"></span>MA5</span>
+      <span><span class="leg-dash"></span>MA20</span>
+    </div>
+  </div>
+  <div class="section-title">💼 法人籌碼</div>
+  <div class="analysis">🌍 外資：連買 6 日（單日最高 4,894 張），中等規模，外資穩定加碼。<br>🚨 出場警示：✅ 持續偏多</div>
+  <div class="section-title">📰 最新新聞</div>
+  <div class="news-box">
+    
+    <div class="news-item">📰 [Yahoo股市] 智原助攻終端AI應用發展 推28奈米平台IP解決方案</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 智原宣布支援聯電SST-ESF4平台IP解決方案問世，主攻終端AI應用</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 智原 公告本公司115年第一季法人說明會日期</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 量產專案減少，智原Q1估為今年營運谷底</div>
+    
+    <div class="news-item">📰 [Yahoo股市] ASIC設計廠 營運分歧加劇</div>
+    
+  </div>
+</div>
+
+<div class="card" style=""
+  data-vol="78494"
+  data-ratio="1.55"
+  data-fdays="6"
+  data-price="16.9"
+  data-code="2834"
+  data-name="臺企銀">
+  
+  <div class="card-header">
+    <div>
+      <span class="code">2834</span>
+      <span class="name">臺企銀</span>
+      
+    </div>
+    <div class="right">
+      <span class="price">NT$ 16.9</span>
+      <span class="badge">外資✅</span>
+      <span class="warn warn-ok">✅ 持續偏多</span>
+    </div>
+  </div>
+  <div class="metrics">
+    <div class="metric"><div class="m-label">成交量</div><div class="m-val">78,494 張</div></div>
+    <div class="metric"><div class="m-label">量比</div><div class="m-val">1.55x</div></div>
+    <div class="metric"><div class="m-label">外資連買</div><div class="m-val">6 日</div></div>
+    <div class="metric"><div class="m-label">投信連買</div><div class="m-val">0 日</div></div>
+    <div class="metric"><div class="m-label">MA5</div><div class="m-val">16.05</div></div>
+    <div class="metric"><div class="m-label">MA20</div><div class="m-val">15.37</div></div>
+  </div>
+  <div class="section-title">📐 技術面解讀</div>
+  <div class="analysis">📐 均線：MA5(16.05) 高於 MA20(15.37) 0.68元（4.4%），均線多頭排列穩固，上升趨勢明確。<br>📊 MACD：MACD柱狀體剛翻正，動能初步轉強（柱狀體 0.185）。<br>📦 成交量：溫和放量，穩健推升（量比 1.55x，當日 78,494 張）。</div>
+  <div class="chart-wrap">
+    <div class="chart-title">📈 近60日走勢（收盤價 / MA5 / MA20）</div>
+    <div style="position:relative;height:180px;width:100%;overflow:hidden;"><div style="position:relative;height:180px;width:100%;overflow:hidden;"><canvas id="chart-2834" class="scan-chart"></canvas></div><script id="cd-chart-2834" type="application/json">{"dates": ["01/13", "01/14", "01/15", "01/16", "01/19", "01/20", "01/21", "01/22", "01/23", "01/26", "01/27", "01/28", "01/29", "01/30", "02/02", "02/03", "02/04", "02/05", "02/06", "02/09", "02/10", "02/11", "02/23", "02/24", "02/25", "02/26", "03/02", "03/03", "03/04", "03/05", "03/06", "03/09", "03/10", "03/11", "03/12", "03/13", "03/16", "03/17", "03/18", "03/19", "03/20", "03/23", "03/24", "03/25", "03/26", "03/27", "03/30", "03/31", "04/01", "04/02", "04/07", "04/08", "04/09", "04/10", "04/13", "04/14", "04/15", "04/16", "04/17", "04/20"], "close": [15.95, 15.9, 15.9, 15.9, 15.9, 15.85, 15.75, 15.65, 15.7, 15.65, 15.5, 15.55, 15.55, 15.4, 15.25, 15.35, 15.35, 15.45, 15.4, 15.45, 15.7, 15.8, 16.1, 16.2, 16.15, 16.4, 15.95, 15.8, 15.35, 15.35, 15.45, 15.05, 15.05, 15.2, 15.05, 15.0, 15.0, 15.05, 15.15, 15.05, 15.0, 14.85, 15.05, 15.1, 15.05, 15.05, 15.0, 15.0, 15.2, 15.25, 15.25, 15.35, 15.35, 15.35, 15.3, 15.35, 15.5, 16.2, 16.3, 16.9], "ma5": [16.05, 16.02, 15.97, 15.92, 15.91, 15.89, 15.86, 15.81, 15.77, 15.72, 15.65, 15.61, 15.59, 15.53, 15.45, 15.42, 15.38, 15.36, 15.36, 15.4, 15.47, 15.56, 15.69, 15.85, 15.99, 16.13, 16.16, 16.1, 15.93, 15.77, 15.58, 15.4, 15.25, 15.22, 15.16, 15.07, 15.06, 15.06, 15.05, 15.05, 15.05, 15.02, 15.02, 15.01, 15.01, 15.02, 15.05, 15.04, 15.06, 15.1, 15.14, 15.21, 15.28, 15.31, 15.32, 15.34, 15.37, 15.54, 15.73, 16.05], "ma20": [16.06, 16.07, 16.07, 16.06, 16.06, 16.04, 16.02, 15.99, 15.97, 15.95, 15.91, 15.89, 15.86, 15.83, 15.79, 15.75, 15.72, 15.68, 15.64, 15.62, 15.61, 15.6, 15.61, 15.63, 15.64, 15.67, 15.68, 15.68, 15.67, 15.65, 15.65, 15.63, 15.6, 15.59, 15.58, 15.56, 15.55, 15.53, 15.51, 15.49, 15.46, 15.41, 15.36, 15.3, 15.25, 15.18, 15.13, 15.09, 15.09, 15.08, 15.07, 15.09, 15.1, 15.11, 15.12, 15.14, 15.16, 15.22, 15.28, 15.37], "vol": [12015, 29930, 9813, 13102, 21753, 16954, 29609, 18482, 16057, 13066, 30768, 20219, 15825, 33254, 22502, 8460, 13482, 10843, 11677, 13495, 19819, 17861, 54049, 25530, 24657, 50711, 39256, 25784, 46543, 26618, 18458, 48954, 34499, 21517, 24613, 32284, 26112, 24564, 16821, 26746, 30819, 30408, 23630, 27085, 15807, 20576, 24949, 21392, 19309, 17109, 12914, 20404, 20334, 27012, 18932, 25107, 33343, 80681, 36271, 78494]}</script></div>
+    <div class="chart-legend">
+      <span><span class="leg-line" style="background:#2563eb;"></span>收盤價</span>
+      <span><span class="leg-line" style="background:#f59e0b;"></span>MA5</span>
+      <span><span class="leg-dash"></span>MA20</span>
+    </div>
+  </div>
+  <div class="section-title">💼 法人籌碼</div>
+  <div class="analysis">🌍 外資：連買 6 日（單日最高 54,954 張），大規模買超，外資高度積極。<br>🚨 出場警示：✅ 持續偏多</div>
+  <div class="section-title">📰 最新新聞</div>
+  <div class="news-box">
+    
+    <div class="news-item">📰 [Yahoo股市] 公股銀與陸電支合作 現退場潮</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 4/16上市外資及陸資買超排行前20名</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 台企銀發1元股利網盛讚「高CP值」！今股價跳空大漲5% 成交爆量衝第六</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 臺企銀股利略優預期，今年核心/海外盈餘續看增</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 去年稅後純益創新高！臺企銀股利政策公布了</div>
+    
+  </div>
+</div>
+
+<div class="card" style=""
+  data-vol="6535"
+  data-ratio="2.13"
+  data-fdays="6"
+  data-price="12.0"
+  data-code="3024"
+  data-name="憶聲">
+  
+  <div class="card-header">
+    <div>
+      <span class="code">3024</span>
+      <span class="name">憶聲</span>
+      
+    </div>
+    <div class="right">
+      <span class="price">NT$ 12.0</span>
+      <span class="badge">外資✅</span>
+      <span class="warn warn-ok">✅ 持續偏多</span>
+    </div>
+  </div>
+  <div class="metrics">
+    <div class="metric"><div class="m-label">成交量</div><div class="m-val">6,535 張</div></div>
+    <div class="metric"><div class="m-label">量比</div><div class="m-val">2.13x</div></div>
+    <div class="metric"><div class="m-label">外資連買</div><div class="m-val">6 日</div></div>
+    <div class="metric"><div class="m-label">投信連買</div><div class="m-val">0 日</div></div>
+    <div class="metric"><div class="m-label">MA5</div><div class="m-val">10.69</div></div>
+    <div class="metric"><div class="m-label">MA20</div><div class="m-val">10.31</div></div>
+  </div>
+  <div class="section-title">📐 技術面解讀</div>
+  <div class="analysis">📐 均線：MA5(10.69) 高於 MA20(10.31) 0.38元（3.7%），均線多頭排列穩固，上升趨勢明確。<br>📊 MACD：MACD柱狀體剛翻正，動能初步轉強（柱狀體 0.1663）。<br>📦 成交量：明顯放量，買盤積極進場（量比 2.13x，當日 6,535 張）。</div>
+  <div class="chart-wrap">
+    <div class="chart-title">📈 近60日走勢（收盤價 / MA5 / MA20）</div>
+    <div style="position:relative;height:180px;width:100%;overflow:hidden;"><div style="position:relative;height:180px;width:100%;overflow:hidden;"><canvas id="chart-3024" class="scan-chart"></canvas></div><script id="cd-chart-3024" type="application/json">{"dates": ["01/13", "01/14", "01/15", "01/16", "01/19", "01/20", "01/21", "01/22", "01/23", "01/26", "01/27", "01/28", "01/29", "01/30", "02/02", "02/03", "02/04", "02/05", "02/06", "02/09", "02/10", "02/11", "02/23", "02/24", "02/25", "02/26", "03/02", "03/03", "03/04", "03/05", "03/06", "03/09", "03/10", "03/11", "03/12", "03/13", "03/16", "03/17", "03/18", "03/19", "03/20", "03/23", "03/24", "03/25", "03/26", "03/27", "03/30", "03/31", "04/01", "04/02", "04/07", "04/08", "04/09", "04/10", "04/13", "04/14", "04/15", "04/16", "04/17", "04/20"], "close": [10.95, 11.35, 11.35, 11.2, 11.45, 11.45, 11.15, 11.2, 11.15, 11.3, 11.0, 10.9, 10.65, 10.55, 10.25, 10.2, 10.45, 10.45, 10.25, 10.25, 10.3, 10.3, 10.6, 10.55, 10.5, 10.5, 10.7, 10.45, 10.05, 10.2, 10.5, 10.1, 10.1, 10.4, 10.25, 10.15, 10.2, 10.4, 10.7, 10.75, 10.7, 10.25, 10.2, 10.15, 10.15, 10.2, 10.1, 9.97, 10.0, 10.2, 10.15, 10.35, 10.05, 10.1, 10.2, 10.05, 10.05, 10.4, 10.95, 12.0], "ma5": [11.25, 11.19, 11.18, 11.2, 11.26, 11.36, 11.32, 11.29, 11.28, 11.25, 11.16, 11.11, 11.0, 10.88, 10.67, 10.51, 10.42, 10.38, 10.32, 10.32, 10.34, 10.31, 10.34, 10.4, 10.45, 10.49, 10.57, 10.54, 10.44, 10.38, 10.38, 10.26, 10.19, 10.26, 10.27, 10.2, 10.22, 10.28, 10.34, 10.44, 10.55, 10.56, 10.52, 10.41, 10.29, 10.19, 10.16, 10.11, 10.08, 10.09, 10.08, 10.13, 10.15, 10.17, 10.17, 10.15, 10.09, 10.16, 10.33, 10.69], "ma20": [11.23, 11.25, 11.27, 11.28, 11.29, 11.31, 11.3, 11.3, 11.3, 11.29, 11.27, 11.24, 11.22, 11.17, 11.13, 11.07, 11.01, 10.96, 10.92, 10.87, 10.84, 10.79, 10.75, 10.72, 10.67, 10.62, 10.6, 10.56, 10.51, 10.45, 10.43, 10.39, 10.36, 10.36, 10.36, 10.35, 10.34, 10.34, 10.36, 10.38, 10.4, 10.4, 10.38, 10.36, 10.34, 10.33, 10.3, 10.28, 10.27, 10.27, 10.26, 10.27, 10.27, 10.25, 10.25, 10.24, 10.24, 10.24, 10.25, 10.31], "vol": [517, 1374, 416, 456, 1344, 751, 754, 563, 433, 1102, 1435, 721, 881, 820, 664, 609, 1421, 548, 536, 555, 534, 390, 773, 725, 508, 738, 923, 1190, 1057, 477, 688, 977, 389, 779, 703, 618, 400, 1131, 926, 1365, 636, 786, 611, 451, 454, 848, 493, 1038, 566, 987, 462, 721, 790, 651, 1254, 897, 1888, 2307, 3701, 6535]}</script></div>
+    <div class="chart-legend">
+      <span><span class="leg-line" style="background:#2563eb;"></span>收盤價</span>
+      <span><span class="leg-line" style="background:#f59e0b;"></span>MA5</span>
+      <span><span class="leg-dash"></span>MA20</span>
+    </div>
+  </div>
+  <div class="section-title">💼 法人籌碼</div>
+  <div class="analysis">🌍 外資：連買 6 日（單日最高 1,485 張），小額但持續，外資默默佈局。<br>🚨 出場警示：✅ 持續偏多</div>
+  <div class="section-title">📰 最新新聞</div>
+  <div class="news-box">
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】憶聲 2026年3月合併營收7591.3萬元 年增-58.11%</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】憶聲董事會決議股利分派</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】憶聲 2026年2月合併營收9889.2萬元 年增-65.38%</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】憶聲 2026年1月合併營收8281.6萬元 年增-48.53%</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】憶聲 2025年12月合併營收5317.2萬元 年增-91.96%</div>
+    
+  </div>
+</div>
+
+<div class="card" style=""
+  data-vol="1965"
+  data-ratio="1.53"
+  data-fdays="6"
+  data-price="128.0"
+  data-code="3708"
+  data-name="上緯投控">
+  
+  <div class="card-header">
+    <div>
+      <span class="code">3708</span>
+      <span class="name">上緯投控</span>
+      
+    </div>
+    <div class="right">
+      <span class="price">NT$ 128.0</span>
+      <span class="badge">外資✅</span>
+      <span class="warn warn-ok">✅ 持續偏多</span>
+    </div>
+  </div>
+  <div class="metrics">
+    <div class="metric"><div class="m-label">成交量</div><div class="m-val">1,965 張</div></div>
+    <div class="metric"><div class="m-label">量比</div><div class="m-val">1.53x</div></div>
+    <div class="metric"><div class="m-label">外資連買</div><div class="m-val">6 日</div></div>
+    <div class="metric"><div class="m-label">投信連買</div><div class="m-val">0 日</div></div>
+    <div class="metric"><div class="m-label">MA5</div><div class="m-val">120.0</div></div>
+    <div class="metric"><div class="m-label">MA20</div><div class="m-val">118.9</div></div>
+  </div>
+  <div class="section-title">📐 技術面解讀</div>
+  <div class="analysis">📐 均線：MA5(120.0) 高於 MA20(118.9) 1.1元（0.9%），黃金交叉剛形成，趨勢轉強初期。<br>📊 MACD：MACD柱狀體持續上揚，動能健康（柱狀體 0.7964）。<br>📦 成交量：溫和放量，穩健推升（量比 1.53x，當日 1,965 張）。</div>
+  <div class="chart-wrap">
+    <div class="chart-title">📈 近60日走勢（收盤價 / MA5 / MA20）</div>
+    <div style="position:relative;height:180px;width:100%;overflow:hidden;"><div style="position:relative;height:180px;width:100%;overflow:hidden;"><canvas id="chart-3708" class="scan-chart"></canvas></div><script id="cd-chart-3708" type="application/json">{"dates": ["01/13", "01/14", "01/15", "01/16", "01/19", "01/20", "01/21", "01/22", "01/23", "01/26", "01/27", "01/28", "01/29", "01/30", "02/02", "02/03", "02/04", "02/05", "02/06", "02/09", "02/10", "02/11", "02/23", "02/24", "02/25", "02/26", "03/02", "03/03", "03/04", "03/05", "03/06", "03/09", "03/10", "03/11", "03/12", "03/13", "03/16", "03/17", "03/18", "03/19", "03/20", "03/23", "03/24", "03/25", "03/26", "03/27", "03/30", "03/31", "04/01", "04/02", "04/07", "04/08", "04/09", "04/10", "04/13", "04/14", "04/15", "04/16", "04/17", "04/20"], "close": [114.5, 114.0, 116.5, 120.0, 125.0, 126.5, 123.0, 124.0, 124.5, 123.0, 121.5, 120.0, 119.0, 116.5, 112.0, 112.5, 117.0, 113.0, 108.0, 104.0, 105.0, 103.0, 113.0, 119.0, 118.0, 121.5, 122.5, 119.5, 112.5, 116.0, 117.5, 119.5, 123.5, 130.0, 128.5, 130.0, 125.5, 127.0, 124.0, 119.0, 122.0, 118.0, 118.0, 120.5, 120.0, 122.5, 126.5, 119.0, 122.5, 116.0, 113.0, 113.5, 114.0, 116.0, 116.5, 116.5, 113.5, 118.5, 123.5, 128.0], "ma5": [112.8, 113.5, 115.0, 116.9, 118.0, 120.4, 122.2, 123.7, 124.6, 124.2, 123.2, 122.6, 121.6, 120.0, 117.8, 116.0, 115.4, 114.2, 112.5, 110.9, 109.4, 106.6, 106.6, 108.8, 111.6, 114.9, 118.8, 120.1, 118.8, 118.4, 117.6, 117.0, 117.8, 121.3, 123.8, 126.3, 127.5, 128.2, 127.0, 125.1, 123.5, 122.0, 120.2, 119.5, 119.7, 119.8, 121.5, 121.7, 122.1, 121.3, 119.4, 116.8, 115.8, 114.5, 114.6, 115.3, 115.3, 116.2, 117.7, 120.0], "ma20": [112.1, 112.5, 113.0, 113.62, 114.6, 115.47, 115.72, 115.97, 116.3, 116.72, 117.0, 117.35, 117.75, 118.0, 118.03, 118.1, 118.42, 118.62, 118.5, 117.72, 117.25, 116.7, 116.53, 116.47, 116.12, 115.88, 115.85, 115.62, 115.03, 114.67, 114.47, 114.45, 114.67, 115.35, 116.17, 117.05, 117.47, 118.17, 118.97, 119.72, 120.58, 121.33, 121.58, 121.65, 121.75, 121.8, 122.0, 121.97, 122.47, 122.47, 122.25, 121.95, 121.47, 120.78, 120.17, 119.5, 118.9, 118.47, 118.45, 118.9], "vol": [1813, 1077, 1705, 2426, 3756, 1902, 1608, 1733, 1190, 1458, 1615, 1190, 1619, 1324, 1194, 816, 1109, 973, 1199, 984, 526, 541, 1477, 1998, 1427, 3569, 2113, 2108, 1938, 1591, 784, 1791, 2111, 4617, 2222, 1852, 1805, 1360, 1087, 1339, 1438, 1146, 1091, 1192, 909, 832, 2361, 2430, 1492, 1786, 946, 601, 712, 623, 990, 369, 753, 1103, 2241, 1965]}</script></div>
+    <div class="chart-legend">
+      <span><span class="leg-line" style="background:#2563eb;"></span>收盤價</span>
+      <span><span class="leg-line" style="background:#f59e0b;"></span>MA5</span>
+      <span><span class="leg-dash"></span>MA20</span>
+    </div>
+  </div>
+  <div class="section-title">💼 法人籌碼</div>
+  <div class="analysis">🌍 外資：連買 6 日（單日最高 1,083 張），小額但持續，外資默默佈局。<br>🚨 出場警示：✅ 持續偏多</div>
+  <div class="section-title">📰 最新新聞</div>
+  <div class="news-box">
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】上緯投控董事會決議買回庫藏股</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】上緯投控 2026年3月合併營收1.08億元 年增7.3%</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】上緯投控買回庫藏股執行完畢(更正買回股份總金額)</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】上緯投控買回庫藏股執行完畢</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】上緯投控庫藏股買回達一定標準申報</div>
+    
+  </div>
+</div>
+
+<div class="card" style=""
+  data-vol="6409"
+  data-ratio="2.42"
+  data-fdays="6"
+  data-price="71.6"
+  data-code="3504"
+  data-name="揚明光">
+  
+  <div class="card-header">
+    <div>
+      <span class="code">3504</span>
+      <span class="name">揚明光</span>
+      
+    </div>
+    <div class="right">
+      <span class="price">NT$ 71.6</span>
+      <span class="badge">外資✅</span>
+      <span class="warn warn-ok">✅ 持續偏多</span>
+    </div>
+  </div>
+  <div class="metrics">
+    <div class="metric"><div class="m-label">成交量</div><div class="m-val">6,409 張</div></div>
+    <div class="metric"><div class="m-label">量比</div><div class="m-val">2.42x</div></div>
+    <div class="metric"><div class="m-label">外資連買</div><div class="m-val">6 日</div></div>
+    <div class="metric"><div class="m-label">投信連買</div><div class="m-val">0 日</div></div>
+    <div class="metric"><div class="m-label">MA5</div><div class="m-val">64.42</div></div>
+    <div class="metric"><div class="m-label">MA20</div><div class="m-val">56.6</div></div>
+  </div>
+  <div class="section-title">📐 技術面解讀</div>
+  <div class="analysis">📐 均線：MA5(64.42) 高於 MA20(56.6) 7.82元（13.8%），均線強勢擴張，多頭格局確立。<br>📊 MACD：MACD柱狀體持續上揚，動能健康（柱狀體 1.9371）。<br>📦 成交量：明顯放量，買盤積極進場（量比 2.42x，當日 6,409 張）。</div>
+  <div class="chart-wrap">
+    <div class="chart-title">📈 近60日走勢（收盤價 / MA5 / MA20）</div>
+    <div style="position:relative;height:180px;width:100%;overflow:hidden;"><div style="position:relative;height:180px;width:100%;overflow:hidden;"><canvas id="chart-3504" class="scan-chart"></canvas></div><script id="cd-chart-3504" type="application/json">{"dates": ["01/13", "01/14", "01/15", "01/16", "01/19", "01/20", "01/21", "01/22", "01/23", "01/26", "01/27", "01/28", "01/29", "01/30", "02/02", "02/03", "02/04", "02/05", "02/06", "02/09", "02/10", "02/11", "02/23", "02/24", "02/25", "02/26", "03/02", "03/03", "03/04", "03/05", "03/06", "03/09", "03/10", "03/11", "03/12", "03/13", "03/16", "03/17", "03/18", "03/19", "03/20", "03/23", "03/24", "03/25", "03/26", "03/27", "03/30", "03/31", "04/01", "04/02", "04/07", "04/08", "04/09", "04/10", "04/13", "04/14", "04/15", "04/16", "04/17", "04/20"], "close": [52.1, 52.3, 57.5, 55.5, 56.5, 56.5, 56.0, 57.7, 57.2, 58.3, 56.4, 56.6, 55.9, 54.2, 52.7, 54.0, 54.7, 54.4, 53.4, 55.3, 54.4, 53.8, 55.2, 60.7, 61.1, 64.5, 63.8, 63.8, 59.0, 60.5, 60.5, 55.8, 54.6, 56.9, 57.0, 58.1, 59.5, 59.4, 59.5, 59.6, 58.3, 55.7, 55.5, 57.8, 55.5, 54.9, 53.1, 50.4, 53.1, 51.2, 50.7, 52.3, 51.8, 52.2, 57.4, 60.8, 61.0, 61.3, 67.4, 71.6], "ma5": [51.34, 51.6, 53.0, 53.88, 54.78, 55.66, 56.4, 56.44, 56.78, 57.14, 57.12, 57.24, 56.88, 56.28, 55.16, 54.68, 54.3, 54.0, 53.84, 54.36, 54.44, 54.26, 54.42, 55.88, 57.04, 59.06, 61.06, 62.78, 62.44, 62.32, 61.52, 59.92, 58.08, 57.66, 56.96, 56.48, 57.22, 58.18, 58.7, 59.22, 59.26, 58.5, 57.72, 57.38, 56.56, 55.88, 55.36, 54.34, 53.4, 52.54, 51.7, 51.54, 51.82, 51.64, 52.88, 54.9, 56.64, 58.54, 61.58, 64.42], "ma20": [51.45, 51.47, 51.77, 51.97, 52.25, 52.52, 52.7, 53.01, 53.28, 53.6, 53.82, 54.09, 54.36, 54.47, 54.55, 54.7, 54.89, 55.08, 55.2, 55.36, 55.48, 55.55, 55.44, 55.7, 55.93, 56.33, 56.72, 57.02, 57.11, 57.22, 57.43, 57.39, 57.32, 57.46, 57.67, 57.88, 58.11, 58.36, 58.67, 58.88, 59.08, 59.17, 59.19, 59.04, 58.76, 58.28, 57.75, 57.08, 56.78, 56.32, 55.83, 55.65, 55.51, 55.28, 55.3, 55.44, 55.51, 55.6, 56.0, 56.6], "vol": [148, 136, 1919, 1464, 589, 308, 223, 558, 1582, 700, 433, 257, 276, 358, 218, 281, 228, 113, 265, 826, 181, 233, 213, 1961, 3708, 3544, 1958, 3363, 1204, 750, 500, 925, 564, 448, 409, 380, 413, 1165, 429, 589, 470, 634, 341, 273, 310, 244, 384, 386, 252, 180, 213, 127, 224, 178, 739, 2457, 1402, 614, 2354, 6409]}</script></div>
+    <div class="chart-legend">
+      <span><span class="leg-line" style="background:#2563eb;"></span>收盤價</span>
+      <span><span class="leg-line" style="background:#f59e0b;"></span>MA5</span>
+      <span><span class="leg-dash"></span>MA20</span>
+    </div>
+  </div>
+  <div class="section-title">💼 法人籌碼</div>
+  <div class="analysis">🌍 外資：連買 6 日（單日最高 1,709 張），小額但持續，外資默默佈局。<br>🚨 出場警示：✅ 持續偏多</div>
+  <div class="section-title">📰 最新新聞</div>
+  <div class="news-box">
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】因揚明光有價證券於集中交易市場達公布注意交易資訊標準，故公布相關財務業務等重大訊息，以利投資人區別瞭解。</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】揚明光 2026年3月合併營收2.82億元 年增21.57%</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】揚明光 2026年2月合併營收1.79億元 年增-18.56%</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】揚明光 2026年1月合併營收2.24億元 年增13.02%</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】揚明光將於2月6日召開線上法人說明會</div>
+    
+  </div>
+</div>
+
+<div class="card" style=""
+  data-vol="7769"
+  data-ratio="2.17"
+  data-fdays="6"
+  data-price="50.8"
+  data-code="5244"
+  data-name="弘凱">
+  
+  <div class="card-header">
+    <div>
+      <span class="code">5244</span>
+      <span class="name">弘凱</span>
+      
+    </div>
+    <div class="right">
+      <span class="price">NT$ 50.8</span>
+      <span class="badge">外資✅</span>
+      <span class="warn warn-ok">✅ 持續偏多</span>
+    </div>
+  </div>
+  <div class="metrics">
+    <div class="metric"><div class="m-label">成交量</div><div class="m-val">7,769 張</div></div>
+    <div class="metric"><div class="m-label">量比</div><div class="m-val">2.17x</div></div>
+    <div class="metric"><div class="m-label">外資連買</div><div class="m-val">6 日</div></div>
+    <div class="metric"><div class="m-label">投信連買</div><div class="m-val">0 日</div></div>
+    <div class="metric"><div class="m-label">MA5</div><div class="m-val">43.88</div></div>
+    <div class="metric"><div class="m-label">MA20</div><div class="m-val">40.31</div></div>
+  </div>
+  <div class="section-title">📐 技術面解讀</div>
+  <div class="analysis">📐 均線：MA5(43.88) 高於 MA20(40.31) 3.57元（8.9%），均線強勢擴張，多頭格局確立。<br>📊 MACD：MACD柱狀體持續上揚，動能健康（柱狀體 1.0255）。<br>📦 成交量：明顯放量，買盤積極進場（量比 2.17x，當日 7,769 張）。</div>
+  <div class="chart-wrap">
+    <div class="chart-title">📈 近60日走勢（收盤價 / MA5 / MA20）</div>
+    <div style="position:relative;height:180px;width:100%;overflow:hidden;"><div style="position:relative;height:180px;width:100%;overflow:hidden;"><canvas id="chart-5244" class="scan-chart"></canvas></div><script id="cd-chart-5244" type="application/json">{"dates": ["01/13", "01/14", "01/15", "01/16", "01/19", "01/20", "01/21", "01/22", "01/23", "01/26", "01/27", "01/28", "01/29", "01/30", "02/02", "02/03", "02/04", "02/05", "02/06", "02/09", "02/10", "02/11", "02/23", "02/24", "02/25", "02/26", "03/02", "03/03", "03/04", "03/05", "03/06", "03/09", "03/10", "03/11", "03/12", "03/13", "03/16", "03/17", "03/18", "03/19", "03/20", "03/23", "03/24", "03/25", "03/26", "03/27", "03/30", "03/31", "04/01", "04/02", "04/07", "04/08", "04/09", "04/10", "04/13", "04/14", "04/15", "04/16", "04/17", "04/20"], "close": [38.0, 38.85, 39.15, 39.3, 39.65, 39.9, 39.4, 39.05, 39.3, 38.9, 39.25, 40.2, 38.85, 38.15, 37.5, 37.65, 38.1, 38.15, 37.15, 37.55, 37.35, 36.85, 38.05, 39.1, 39.1, 38.7, 39.2, 38.7, 36.8, 37.1, 37.55, 35.2, 33.85, 34.7, 34.5, 36.85, 36.4, 36.2, 35.75, 38.35, 39.55, 36.95, 37.7, 41.45, 39.0, 38.2, 40.6, 37.6, 38.95, 40.2, 39.4, 38.75, 39.05, 39.65, 39.7, 39.05, 41.35, 42.0, 46.2, 50.8], "ma5": [38.4, 38.31, 38.51, 38.7, 38.99, 39.37, 39.48, 39.46, 39.46, 39.31, 39.18, 39.34, 39.3, 39.07, 38.79, 38.47, 38.05, 37.91, 37.71, 37.72, 37.66, 37.41, 37.39, 37.78, 38.09, 38.36, 38.83, 38.96, 38.5, 38.1, 37.87, 37.07, 36.1, 35.68, 35.16, 35.02, 35.26, 35.73, 35.94, 36.71, 37.25, 37.36, 37.66, 38.8, 38.93, 38.66, 39.39, 39.37, 38.87, 39.11, 39.35, 38.98, 39.27, 39.41, 39.31, 39.24, 39.76, 40.35, 41.66, 43.88], "ma20": [39.98, 39.87, 39.8, 39.75, 39.76, 39.77, 39.72, 39.66, 39.61, 39.57, 39.54, 39.57, 39.34, 39.09, 38.94, 38.86, 38.8, 38.8, 38.74, 38.7, 38.67, 38.57, 38.52, 38.51, 38.48, 38.42, 38.41, 38.39, 38.26, 38.17, 38.09, 37.84, 37.59, 37.42, 37.27, 37.23, 37.14, 37.04, 36.97, 37.01, 37.12, 37.13, 37.11, 37.23, 37.23, 37.2, 37.27, 37.21, 37.32, 37.48, 37.57, 37.75, 38.01, 38.26, 38.52, 38.63, 38.87, 39.16, 39.69, 40.31], "vol": [320, 132, 202, 258, 142, 437, 250, 144, 142, 78, 465, 538, 260, 205, 138, 145, 81, 95, 194, 98, 78, 246, 160, 486, 142, 201, 283, 268, 324, 203, 138, 299, 662, 328, 107, 527, 331, 139, 156, 1716, 1993, 867, 1821, 2662, 6392, 2153, 2516, 2683, 3142, 1942, 1689, 1491, 1006, 841, 573, 640, 3696, 1581, 4204, 7769]}</script></div>
+    <div class="chart-legend">
+      <span><span class="leg-line" style="background:#2563eb;"></span>收盤價</span>
+      <span><span class="leg-line" style="background:#f59e0b;"></span>MA5</span>
+      <span><span class="leg-dash"></span>MA20</span>
+    </div>
+  </div>
+  <div class="section-title">💼 法人籌碼</div>
+  <div class="analysis">🌍 外資：連買 6 日（單日最高 1,168 張），小額但持續，外資默默佈局。<br>🚨 出場警示：✅ 持續偏多</div>
+  <div class="section-title">📰 最新新聞</div>
+  <div class="news-box">
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】弘凱 2026年3月合併營收5644.3萬元 年增-18.76%</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】弘凱受邀參加台新證券舉辦之法人說明會</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】弘凱董事會決議股利分派</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】弘凱 2026年2月合併營收4206.5萬元 年增-15.76%</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】弘凱 2026年1月合併營收6271.4萬元 年增5.96%</div>
+    
+  </div>
+</div>
+
+<div class="card" style=""
+  data-vol="32432"
+  data-ratio="2.36"
+  data-fdays="6"
+  data-price="241.5"
+  data-code="4977"
+  data-name="眾達-KY">
+  
+  <div class="card-header">
+    <div>
+      <span class="code">4977</span>
+      <span class="name">眾達-KY</span>
+      
+    </div>
+    <div class="right">
+      <span class="price">NT$ 241.5</span>
+      <span class="badge">外資✅</span>
+      <span class="warn warn-ok">✅ 持續偏多</span>
+    </div>
+  </div>
+  <div class="metrics">
+    <div class="metric"><div class="m-label">成交量</div><div class="m-val">32,432 張</div></div>
+    <div class="metric"><div class="m-label">量比</div><div class="m-val">2.36x</div></div>
+    <div class="metric"><div class="m-label">外資連買</div><div class="m-val">6 日</div></div>
+    <div class="metric"><div class="m-label">投信連買</div><div class="m-val">0 日</div></div>
+    <div class="metric"><div class="m-label">MA5</div><div class="m-val">215.0</div></div>
+    <div class="metric"><div class="m-label">MA20</div><div class="m-val">196.28</div></div>
+  </div>
+  <div class="section-title">📐 技術面解讀</div>
+  <div class="analysis">📐 均線：MA5(215.0) 高於 MA20(196.28) 18.72元（9.5%），均線強勢擴張，多頭格局確立。<br>📊 MACD：MACD柱狀體強勁擴張，動能極強（柱狀體 3.816）。<br>📦 成交量：明顯放量，買盤積極進場（量比 2.36x，當日 32,432 張）。</div>
+  <div class="chart-wrap">
+    <div class="chart-title">📈 近60日走勢（收盤價 / MA5 / MA20）</div>
+    <div style="position:relative;height:180px;width:100%;overflow:hidden;"><div style="position:relative;height:180px;width:100%;overflow:hidden;"><canvas id="chart-4977" class="scan-chart"></canvas></div><script id="cd-chart-4977" type="application/json">{"dates": ["01/13", "01/14", "01/15", "01/16", "01/19", "01/20", "01/21", "01/22", "01/23", "01/26", "01/27", "01/28", "01/29", "01/30", "02/02", "02/03", "02/04", "02/05", "02/06", "02/09", "02/10", "02/11", "02/23", "02/24", "02/25", "02/26", "03/02", "03/03", "03/04", "03/05", "03/06", "03/09", "03/10", "03/11", "03/12", "03/13", "03/16", "03/17", "03/18", "03/19", "03/20", "03/23", "03/24", "03/25", "03/26", "03/27", "03/30", "03/31", "04/01", "04/02", "04/07", "04/08", "04/09", "04/10", "04/13", "04/14", "04/15", "04/16", "04/17", "04/20"], "close": [119.5, 122.0, 120.0, 118.5, 118.5, 126.0, 122.5, 121.5, 123.0, 120.5, 125.5, 138.0, 136.5, 129.5, 131.5, 133.0, 136.0, 135.5, 127.0, 131.5, 139.0, 125.5, 130.5, 143.5, 157.5, 173.0, 174.0, 172.0, 159.5, 161.0, 167.0, 150.5, 151.0, 166.0, 170.0, 187.0, 186.0, 179.0, 187.5, 192.0, 200.5, 185.0, 181.5, 199.5, 196.0, 200.0, 190.0, 177.0, 182.5, 178.0, 187.5, 186.5, 189.0, 203.0, 194.5, 188.5, 195.0, 214.5, 235.5, 241.5], "ma5": [127.2, 125.8, 124.0, 122.2, 119.7, 121.0, 121.1, 121.4, 122.3, 122.7, 122.6, 125.7, 128.7, 130.0, 132.2, 133.7, 133.3, 133.1, 132.6, 132.6, 133.8, 131.7, 130.7, 134.0, 139.2, 146.0, 155.7, 164.0, 167.2, 167.9, 166.7, 162.0, 157.8, 159.1, 160.9, 164.9, 172.0, 177.6, 181.9, 186.3, 189.0, 188.8, 189.3, 191.7, 192.5, 192.4, 193.4, 192.5, 189.1, 185.5, 183.0, 182.3, 184.7, 188.8, 192.1, 192.3, 194.0, 199.1, 205.6, 215.0], "ma20": [135.72, 134.75, 134.03, 133.15, 132.45, 132.07, 131.3, 130.4, 129.28, 128.03, 127.38, 127.12, 126.85, 126.3, 126.1, 126.12, 126.47, 126.8, 126.78, 126.8, 127.78, 127.95, 128.47, 129.72, 131.68, 134.03, 136.6, 139.12, 140.95, 142.97, 145.05, 145.68, 146.4, 148.22, 150.15, 152.85, 155.35, 157.53, 160.55, 163.57, 166.65, 169.62, 172.18, 174.97, 176.9, 178.25, 179.05, 179.3, 180.45, 181.3, 182.32, 184.12, 186.03, 187.88, 189.1, 189.18, 189.62, 191.4, 193.8, 196.28], "vol": [8862, 2290, 1582, 1944, 2093, 6578, 4047, 1897, 1332, 1821, 7051, 13163, 26867, 7314, 5818, 6684, 6088, 16436, 6105, 4268, 13133, 8201, 10140, 10940, 8204, 29832, 37787, 30698, 15475, 16519, 13750, 4234, 9763, 9082, 15849, 17362, 24510, 17689, 13432, 19306, 28060, 14137, 18384, 6653, 28306, 11385, 8554, 7888, 4503, 5657, 6814, 9264, 9292, 19374, 11609, 9312, 13456, 7444, 5960, 32432]}</script></div>
+    <div class="chart-legend">
+      <span><span class="leg-line" style="background:#2563eb;"></span>收盤價</span>
+      <span><span class="leg-line" style="background:#f59e0b;"></span>MA5</span>
+      <span><span class="leg-dash"></span>MA20</span>
+    </div>
+  </div>
+  <div class="section-title">💼 法人籌碼</div>
+  <div class="analysis">🌍 外資：連買 6 日（單日最高 7,511 張），中等規模，外資穩定加碼。<br>🚨 出場警示：✅ 持續偏多</div>
+  <div class="section-title">📰 最新新聞</div>
+  <div class="news-box">
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】眾達-KY代孫公司PCL INTERNATIONAL TECHNOLOGIES (PENANG) SDN. BHD.公告董事會決議購買廠房案</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】眾達-KY 2026年3月合併營收8726.1萬元 年增-19.39%</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】眾達-KY有價證券於集中交易市場達公布注意交易資訊標準，故公布相關財務業務等重大訊息，以利投資人區別瞭解。</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】眾達-KY董事會決議孫公司PCL INTERNATIONAL TECHNOLOGIES (PENANG) SDN. BHD.擬購買廠房案。</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】眾達-KY董事會決議召開115年股東常會相關事宜</div>
+    
+  </div>
+</div>
+
+<div class="card" style=""
+  data-vol="5816"
+  data-ratio="2.23"
+  data-fdays="6"
+  data-price="143.5"
+  data-code="5222"
+  data-name="全訊">
+  
+  <div class="card-header">
+    <div>
+      <span class="code">5222</span>
+      <span class="name">全訊</span>
+      
+    </div>
+    <div class="right">
+      <span class="price">NT$ 143.5</span>
+      <span class="badge">外資✅</span>
+      <span class="warn warn-ok">✅ 持續偏多</span>
+    </div>
+  </div>
+  <div class="metrics">
+    <div class="metric"><div class="m-label">成交量</div><div class="m-val">5,816 張</div></div>
+    <div class="metric"><div class="m-label">量比</div><div class="m-val">2.23x</div></div>
+    <div class="metric"><div class="m-label">外資連買</div><div class="m-val">6 日</div></div>
+    <div class="metric"><div class="m-label">投信連買</div><div class="m-val">0 日</div></div>
+    <div class="metric"><div class="m-label">MA5</div><div class="m-val">136.1</div></div>
+    <div class="metric"><div class="m-label">MA20</div><div class="m-val">128.33</div></div>
+  </div>
+  <div class="section-title">📐 技術面解讀</div>
+  <div class="analysis">📐 均線：MA5(136.1) 高於 MA20(128.33) 7.77元（6.1%），均線強勢擴張，多頭格局確立。<br>📊 MACD：MACD柱狀體強勁擴張，動能極強（柱狀體 2.5909）。<br>📦 成交量：明顯放量，買盤積極進場（量比 2.23x，當日 5,816 張）。</div>
+  <div class="chart-wrap">
+    <div class="chart-title">📈 近60日走勢（收盤價 / MA5 / MA20）</div>
+    <div style="position:relative;height:180px;width:100%;overflow:hidden;"><div style="position:relative;height:180px;width:100%;overflow:hidden;"><canvas id="chart-5222" class="scan-chart"></canvas></div><script id="cd-chart-5222" type="application/json">{"dates": ["01/13", "01/14", "01/15", "01/16", "01/19", "01/20", "01/21", "01/22", "01/23", "01/26", "01/27", "01/28", "01/29", "01/30", "02/02", "02/03", "02/04", "02/05", "02/06", "02/09", "02/10", "02/11", "02/23", "02/24", "02/25", "02/26", "03/02", "03/03", "03/04", "03/05", "03/06", "03/09", "03/10", "03/11", "03/12", "03/13", "03/16", "03/17", "03/18", "03/19", "03/20", "03/23", "03/24", "03/25", "03/26", "03/27", "03/30", "03/31", "04/01", "04/02", "04/07", "04/08", "04/09", "04/10", "04/13", "04/14", "04/15", "04/16", "04/17", "04/20"], "close": [132.5, 132.99, 134.46, 133.48, 144.28, 148.69, 146.73, 144.77, 145.75, 145.26, 140.35, 137.9, 140.35, 134.46, 132.01, 134.95, 140.35, 133.48, 128.57, 128.57, 127.59, 131.03, 136.92, 140.35, 142.81, 141.33, 137.9, 142.31, 134.95, 136.92, 135.94, 130.54, 129.06, 133.48, 132.99, 131.03, 132.5, 131.52, 132.99, 130.54, 132.99, 129.56, 130.05, 132.5, 130.05, 132.5, 131.5, 127.0, 127.0, 122.5, 112.0, 116.5, 116.5, 117.5, 128.0, 131.0, 130.0, 131.5, 144.5, 143.5], "ma5": [128.87, 130.14, 131.32, 132.7, 135.54, 138.78, 141.53, 143.59, 146.04, 146.24, 144.57, 142.81, 141.92, 139.66, 137.01, 135.94, 136.43, 135.05, 133.87, 133.19, 131.71, 129.85, 130.54, 132.89, 135.74, 138.49, 139.86, 140.94, 139.86, 138.68, 137.6, 136.13, 133.48, 133.19, 132.4, 131.42, 131.81, 132.3, 132.21, 131.71, 132.11, 131.52, 131.22, 131.13, 131.03, 130.93, 131.32, 130.71, 129.61, 128.1, 124.0, 121.0, 118.9, 117.0, 118.1, 121.9, 124.6, 127.6, 133.0, 136.1], "ma20": [129.11, 129.38, 129.83, 130.24, 131.25, 132.25, 132.92, 133.51, 134.19, 134.83, 135.2, 135.52, 136.21, 136.5, 136.67, 137.04, 137.73, 137.97, 138.07, 138.0, 137.75, 137.65, 137.78, 138.12, 138.05, 137.68, 137.24, 137.11, 136.57, 136.16, 135.94, 135.57, 135.0, 134.95, 135.0, 134.81, 134.41, 134.32, 134.54, 134.63, 134.9, 134.83, 134.49, 134.09, 133.46, 133.02, 132.7, 131.93, 131.53, 130.81, 129.61, 128.91, 128.28, 127.49, 127.24, 127.23, 127.11, 127.11, 127.68, 128.33], "vol": [866, 364, 502, 426, 3655, 3368, 2869, 1352, 1227, 1998, 1112, 705, 917, 792, 580, 1196, 1941, 1251, 817, 402, 369, 636, 1083, 1001, 1137, 867, 1861, 2498, 2270, 837, 799, 1345, 835, 729, 451, 710, 447, 427, 488, 452, 715, 976, 554, 284, 552, 820, 451, 701, 284, 848, 1644, 849, 619, 427, 1555, 1143, 667, 927, 4506, 5816]}</script></div>
+    <div class="chart-legend">
+      <span><span class="leg-line" style="background:#2563eb;"></span>收盤價</span>
+      <span><span class="leg-line" style="background:#f59e0b;"></span>MA5</span>
+      <span><span class="leg-dash"></span>MA20</span>
+    </div>
+  </div>
+  <div class="section-title">💼 法人籌碼</div>
+  <div class="analysis">🌍 外資：連買 6 日（單日最高 1,421 張），小額但持續，外資默默佈局。<br>🚨 出場警示：✅ 持續偏多</div>
+  <div class="section-title">📰 最新新聞</div>
+  <div class="news-box">
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】全訊受邀參加群益證券舉辦之法人說明會</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】補充說明全訊於民國115年4月8日法說會之內容</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】全訊 2026年3月合併營收1928.7萬元 年增-76.72%</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】全訊受邀參加永豐金證券舉辦之法人說明會</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】全訊董事會決議114年度股利分派</div>
+    
+  </div>
+</div>
+
+<div class="card" style=""
+  data-vol="7933"
+  data-ratio="1.64"
+  data-fdays="6"
+  data-price="92.5"
+  data-code="4739"
+  data-name="康普">
+  
+  <div class="card-header">
+    <div>
+      <span class="code">4739</span>
+      <span class="name">康普</span>
+      
+    </div>
+    <div class="right">
+      <span class="price">NT$ 92.5</span>
+      <span class="badge">外資✅</span>
+      <span class="warn warn-ok">✅ 持續偏多</span>
+    </div>
+  </div>
+  <div class="metrics">
+    <div class="metric"><div class="m-label">成交量</div><div class="m-val">7,933 張</div></div>
+    <div class="metric"><div class="m-label">量比</div><div class="m-val">1.64x</div></div>
+    <div class="metric"><div class="m-label">外資連買</div><div class="m-val">6 日</div></div>
+    <div class="metric"><div class="m-label">投信連買</div><div class="m-val">0 日</div></div>
+    <div class="metric"><div class="m-label">MA5</div><div class="m-val">89.72</div></div>
+    <div class="metric"><div class="m-label">MA20</div><div class="m-val">84.07</div></div>
+  </div>
+  <div class="section-title">📐 技術面解讀</div>
+  <div class="analysis">📐 均線：MA5(89.72) 高於 MA20(84.07) 5.65元（6.7%），均線強勢擴張，多頭格局確立。<br>📊 MACD：MACD柱狀體持續上揚，動能健康（柱狀體 0.8228）。<br>📦 成交量：溫和放量，穩健推升（量比 1.64x，當日 7,933 張）。</div>
+  <div class="chart-wrap">
+    <div class="chart-title">📈 近60日走勢（收盤價 / MA5 / MA20）</div>
+    <div style="position:relative;height:180px;width:100%;overflow:hidden;"><div style="position:relative;height:180px;width:100%;overflow:hidden;"><canvas id="chart-4739" class="scan-chart"></canvas></div><script id="cd-chart-4739" type="application/json">{"dates": ["01/13", "01/14", "01/15", "01/16", "01/19", "01/20", "01/21", "01/22", "01/23", "01/26", "01/27", "01/28", "01/29", "01/30", "02/02", "02/03", "02/04", "02/05", "02/06", "02/09", "02/10", "02/11", "02/23", "02/24", "02/25", "02/26", "03/02", "03/03", "03/04", "03/05", "03/06", "03/09", "03/10", "03/11", "03/12", "03/13", "03/16", "03/17", "03/18", "03/19", "03/20", "03/23", "03/24", "03/25", "03/26", "03/27", "03/30", "03/31", "04/01", "04/02", "04/07", "04/08", "04/09", "04/10", "04/13", "04/14", "04/15", "04/16", "04/17", "04/20"], "close": [72.2, 72.3, 72.7, 74.0, 75.1, 78.6, 77.3, 78.0, 75.0, 76.0, 72.9, 73.8, 71.1, 67.7, 65.5, 66.9, 67.4, 64.5, 62.9, 69.1, 68.6, 68.0, 71.1, 74.1, 76.4, 77.5, 79.1, 74.4, 67.7, 71.3, 69.9, 65.6, 71.8, 76.5, 75.9, 77.9, 78.2, 78.2, 82.9, 83.2, 82.8, 85.6, 86.9, 85.0, 83.4, 85.2, 81.8, 77.5, 78.1, 76.4, 75.0, 79.2, 82.7, 84.6, 88.5, 88.9, 87.4, 89.4, 90.4, 92.5], "ma5": [69.88, 70.28, 71.32, 72.5, 73.26, 74.54, 75.54, 76.6, 76.8, 76.98, 75.84, 75.14, 73.76, 72.3, 70.2, 69.0, 67.72, 66.4, 65.44, 66.16, 66.5, 66.62, 67.94, 70.18, 71.64, 73.42, 75.64, 76.3, 75.02, 74.0, 72.48, 69.78, 69.26, 71.02, 71.94, 73.54, 76.06, 77.34, 78.62, 80.08, 81.06, 82.54, 84.28, 84.7, 84.74, 85.22, 84.46, 82.58, 81.2, 79.8, 77.76, 77.24, 78.28, 79.58, 82.0, 84.78, 86.42, 87.76, 88.92, 89.72], "ma20": [68.17, 68.32, 68.59, 68.95, 69.32, 69.88, 70.4, 70.83, 71.15, 71.58, 71.88, 72.27, 72.57, 72.54, 72.41, 72.32, 72.17, 72.02, 71.76, 71.65, 71.47, 71.25, 71.17, 71.18, 71.25, 71.19, 71.28, 71.1, 70.73, 70.5, 70.35, 69.94, 69.97, 70.42, 70.94, 71.49, 72.03, 72.71, 73.71, 74.41, 75.12, 76.0, 76.8, 77.34, 77.69, 78.08, 78.21, 78.37, 78.89, 79.14, 79.4, 80.08, 80.62, 81.02, 81.65, 82.2, 82.66, 83.22, 83.6, 84.07], "vol": [1672, 1610, 764, 4602, 1666, 3796, 2531, 4217, 1789, 1070, 1160, 1364, 1483, 1410, 987, 1074, 633, 1250, 1073, 2647, 3294, 1067, 1385, 1814, 2315, 1761, 3477, 2241, 1789, 1411, 1054, 1354, 1318, 2497, 1471, 2162, 2792, 2415, 5194, 13292, 5178, 7003, 9014, 12647, 3438, 4809, 3179, 3713, 1684, 1428, 1355, 2151, 4959, 2960, 6725, 4906, 3911, 4689, 2796, 7933]}</script></div>
+    <div class="chart-legend">
+      <span><span class="leg-line" style="background:#2563eb;"></span>收盤價</span>
+      <span><span class="leg-line" style="background:#f59e0b;"></span>MA5</span>
+      <span><span class="leg-dash"></span>MA20</span>
+    </div>
+  </div>
+  <div class="section-title">💼 法人籌碼</div>
+  <div class="analysis">🌍 外資：連買 6 日（單日最高 2,041 張），小額但持續，外資默默佈局。<br>🚨 出場警示：✅ 持續偏多</div>
+  <div class="section-title">📰 最新新聞</div>
+  <div class="news-box">
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】康普 2026年3月合併營收8.15億元 年增103.62%</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】康普 2026年2月合併營收6.67億元 年增192.15%</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】康普投資越南子公司VINACOREMAX COMPANY LIMITED</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】康普董事會決議股利分派</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】康普代重要子公司恆誼化工股份有限公司公告法人監察人代表人異動</div>
+    
+  </div>
+</div>
+
+<div class="card" style=""
+  data-vol="5532"
+  data-ratio="2.66"
+  data-fdays="6"
+  data-price="117.0"
+  data-code="4968"
+  data-name="立積">
+  
+  <div class="card-header">
+    <div>
+      <span class="code">4968</span>
+      <span class="name">立積</span>
+      
+    </div>
+    <div class="right">
+      <span class="price">NT$ 117.0</span>
+      <span class="badge">外資✅</span>
+      <span class="warn warn-ok">✅ 持續偏多</span>
+    </div>
+  </div>
+  <div class="metrics">
+    <div class="metric"><div class="m-label">成交量</div><div class="m-val">5,532 張</div></div>
+    <div class="metric"><div class="m-label">量比</div><div class="m-val">2.66x</div></div>
+    <div class="metric"><div class="m-label">外資連買</div><div class="m-val">6 日</div></div>
+    <div class="metric"><div class="m-label">投信連買</div><div class="m-val">0 日</div></div>
+    <div class="metric"><div class="m-label">MA5</div><div class="m-val">110.3</div></div>
+    <div class="metric"><div class="m-label">MA20</div><div class="m-val">106.97</div></div>
+  </div>
+  <div class="section-title">📐 技術面解讀</div>
+  <div class="analysis">📐 均線：MA5(110.3) 高於 MA20(106.97) 3.33元（3.1%），均線多頭排列穩固，上升趨勢明確。<br>📊 MACD：MACD柱狀體持續上揚，動能健康（柱狀體 1.6282）。<br>📦 成交量：明顯放量，買盤積極進場（量比 2.66x，當日 5,532 張）。</div>
+  <div class="chart-wrap">
+    <div class="chart-title">📈 近60日走勢（收盤價 / MA5 / MA20）</div>
+    <div style="position:relative;height:180px;width:100%;overflow:hidden;"><div style="position:relative;height:180px;width:100%;overflow:hidden;"><canvas id="chart-4968" class="scan-chart"></canvas></div><script id="cd-chart-4968" type="application/json">{"dates": ["01/13", "01/14", "01/15", "01/16", "01/19", "01/20", "01/21", "01/22", "01/23", "01/26", "01/27", "01/28", "01/29", "01/30", "02/02", "02/03", "02/04", "02/05", "02/06", "02/09", "02/10", "02/11", "02/23", "02/24", "02/25", "02/26", "03/02", "03/03", "03/04", "03/05", "03/06", "03/09", "03/10", "03/11", "03/12", "03/13", "03/16", "03/17", "03/18", "03/19", "03/20", "03/23", "03/24", "03/25", "03/26", "03/27", "03/30", "03/31", "04/01", "04/02", "04/07", "04/08", "04/09", "04/10", "04/13", "04/14", "04/15", "04/16", "04/17", "04/20"], "close": [123.0, 125.5, 124.5, 121.5, 125.5, 126.5, 122.0, 123.5, 124.0, 128.5, 125.5, 125.0, 122.5, 119.0, 114.0, 118.5, 117.5, 129.0, 120.5, 118.0, 120.5, 118.5, 122.5, 123.0, 122.5, 123.5, 122.0, 119.5, 115.0, 116.5, 114.5, 104.0, 104.0, 107.0, 105.0, 104.0, 104.0, 106.0, 107.5, 105.0, 113.0, 105.5, 105.0, 108.5, 106.0, 108.5, 105.0, 101.0, 105.0, 102.0, 105.5, 108.0, 105.5, 104.5, 105.0, 106.0, 106.0, 110.5, 112.0, 117.0], "ma5": [125.3, 124.8, 124.9, 124.4, 124.0, 124.7, 124.0, 123.8, 124.3, 124.9, 124.7, 125.3, 125.1, 124.1, 121.2, 119.8, 118.3, 119.6, 119.9, 120.7, 121.1, 121.3, 120.0, 120.5, 121.4, 122.0, 122.7, 122.1, 120.5, 119.3, 117.5, 113.9, 110.8, 109.2, 106.9, 104.8, 104.8, 105.2, 105.3, 105.3, 107.1, 107.4, 107.2, 107.4, 107.6, 106.7, 106.6, 105.8, 105.1, 104.3, 103.7, 104.3, 105.2, 105.1, 105.7, 105.8, 105.4, 106.4, 107.9, 110.3], "ma20": [127.1, 126.8, 126.55, 126.15, 126.08, 125.95, 125.45, 125.15, 124.92, 124.95, 124.9, 124.85, 124.67, 124.42, 123.97, 123.62, 123.1, 123.35, 123.17, 122.7, 122.58, 122.22, 122.12, 122.2, 122.05, 121.9, 121.9, 121.7, 121.25, 120.65, 120.1, 119.05, 118.12, 117.53, 117.08, 116.35, 115.67, 114.53, 113.88, 113.22, 112.85, 112.2, 111.33, 110.6, 109.78, 109.03, 108.17, 107.25, 106.75, 106.03, 105.58, 105.78, 105.85, 105.72, 105.72, 105.83, 105.92, 106.15, 106.38, 106.97], "vol": [1135, 957, 675, 1305, 1147, 1388, 1004, 960, 596, 2205, 1144, 909, 1397, 1957, 1221, 890, 478, 2977, 3827, 1841, 860, 522, 1059, 779, 768, 1069, 803, 1067, 1993, 3316, 1233, 1983, 1902, 953, 896, 1025, 617, 893, 818, 1012, 3553, 1305, 866, 939, 1202, 752, 756, 1111, 584, 913, 772, 1054, 876, 807, 725, 796, 835, 1567, 1651, 5532]}</script></div>
+    <div class="chart-legend">
+      <span><span class="leg-line" style="background:#2563eb;"></span>收盤價</span>
+      <span><span class="leg-line" style="background:#f59e0b;"></span>MA5</span>
+      <span><span class="leg-dash"></span>MA20</span>
+    </div>
+  </div>
+  <div class="section-title">💼 法人籌碼</div>
+  <div class="analysis">🌍 外資：連買 6 日（單日最高 990 張），小額但持續，外資默默佈局。<br>🚨 出場警示：✅ 持續偏多</div>
+  <div class="section-title">📰 最新新聞</div>
+  <div class="news-box">
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】立積2026年第一季線上法人說明會</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】立積 2026年3月合併營收3.3億元 年增3.33%</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】立積受邀參加美林證券於台北舉辦之2026 Asia Tech Conference</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】立積董事會決議股利分派</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】立積 2026年2月合併營收2.7億元 年增-6.87%</div>
+    
+  </div>
+</div>
+
+<div class="card" style=""
+  data-vol="31746"
+  data-ratio="2.14"
+  data-fdays="6"
+  data-price="114.5"
+  data-code="6191"
+  data-name="精成科">
+  
+  <div class="card-header">
+    <div>
+      <span class="code">6191</span>
+      <span class="name">精成科</span>
+      
+    </div>
+    <div class="right">
+      <span class="price">NT$ 114.5</span>
+      <span class="badge">外資✅</span>
+      <span class="warn warn-ok">✅ 持續偏多</span>
+    </div>
+  </div>
+  <div class="metrics">
+    <div class="metric"><div class="m-label">成交量</div><div class="m-val">31,746 張</div></div>
+    <div class="metric"><div class="m-label">量比</div><div class="m-val">2.14x</div></div>
+    <div class="metric"><div class="m-label">外資連買</div><div class="m-val">6 日</div></div>
+    <div class="metric"><div class="m-label">投信連買</div><div class="m-val">0 日</div></div>
+    <div class="metric"><div class="m-label">MA5</div><div class="m-val">106.1</div></div>
+    <div class="metric"><div class="m-label">MA20</div><div class="m-val">96.28</div></div>
+  </div>
+  <div class="section-title">📐 技術面解讀</div>
+  <div class="analysis">📐 均線：MA5(106.1) 高於 MA20(96.28) 9.82元（10.2%），均線強勢擴張，多頭格局確立。<br>📊 MACD：MACD柱狀體強勁擴張，動能極強（柱狀體 2.5049）。<br>📦 成交量：明顯放量，買盤積極進場（量比 2.14x，當日 31,746 張）。</div>
+  <div class="chart-wrap">
+    <div class="chart-title">📈 近60日走勢（收盤價 / MA5 / MA20）</div>
+    <div style="position:relative;height:180px;width:100%;overflow:hidden;"><div style="position:relative;height:180px;width:100%;overflow:hidden;"><canvas id="chart-6191" class="scan-chart"></canvas></div><script id="cd-chart-6191" type="application/json">{"dates": ["01/13", "01/14", "01/15", "01/16", "01/19", "01/20", "01/21", "01/22", "01/23", "01/26", "01/27", "01/28", "01/29", "01/30", "02/02", "02/03", "02/04", "02/05", "02/06", "02/09", "02/10", "02/11", "02/23", "02/24", "02/25", "02/26", "03/02", "03/03", "03/04", "03/05", "03/06", "03/09", "03/10", "03/11", "03/12", "03/13", "03/16", "03/17", "03/18", "03/19", "03/20", "03/23", "03/24", "03/25", "03/26", "03/27", "03/30", "03/31", "04/01", "04/02", "04/07", "04/08", "04/09", "04/10", "04/13", "04/14", "04/15", "04/16", "04/17", "04/20"], "close": [114.0, 114.5, 115.5, 117.5, 114.0, 115.0, 112.0, 117.5, 119.5, 117.5, 114.5, 114.0, 111.0, 108.5, 104.5, 108.5, 113.0, 106.5, 104.0, 104.5, 105.0, 104.0, 107.5, 110.0, 107.0, 109.0, 109.0, 105.0, 96.9, 99.0, 98.0, 90.6, 94.2, 98.0, 96.4, 99.5, 99.4, 101.0, 100.5, 97.6, 96.2, 92.8, 91.3, 94.1, 92.4, 95.8, 92.1, 88.1, 90.8, 88.3, 89.1, 94.3, 95.3, 99.1, 95.4, 104.5, 102.0, 105.0, 104.5, 114.5], "ma5": [112.8, 113.5, 114.9, 115.6, 115.1, 115.3, 114.8, 115.2, 115.6, 116.3, 116.2, 116.6, 115.3, 113.1, 110.5, 109.3, 109.1, 108.2, 107.3, 107.3, 106.6, 104.8, 105.0, 106.2, 106.7, 107.5, 108.5, 108.0, 105.38, 103.78, 101.58, 97.9, 95.74, 95.96, 95.44, 95.74, 97.5, 98.86, 99.36, 99.6, 98.94, 97.62, 95.68, 94.4, 93.36, 93.28, 93.14, 92.5, 91.84, 91.02, 89.68, 90.12, 91.56, 93.22, 94.64, 97.72, 99.26, 101.2, 102.28, 106.1], "ma20": [113.95, 113.65, 113.62, 113.62, 113.6, 113.55, 113.2, 113.2, 113.35, 113.42, 113.58, 113.78, 113.72, 113.62, 113.42, 113.4, 113.5, 113.4, 112.9, 112.3, 111.85, 111.33, 110.92, 110.55, 110.2, 109.9, 109.75, 109.12, 108.0, 107.07, 106.25, 105.08, 104.23, 103.71, 103.3, 102.85, 102.17, 101.9, 101.72, 101.38, 100.94, 100.38, 99.57, 98.78, 98.05, 97.39, 96.54, 95.7, 95.39, 94.86, 94.41, 94.6, 94.65, 94.71, 94.66, 94.91, 95.04, 95.24, 95.44, 96.28], "vol": [9439, 7303, 5783, 21231, 8388, 7447, 7032, 13990, 10959, 11495, 5223, 5998, 7607, 7857, 5008, 5082, 8118, 6724, 5437, 5292, 2306, 2753, 3514, 5064, 9992, 9023, 7859, 8176, 11444, 5370, 2543, 6982, 4094, 8514, 6405, 7730, 3909, 8322, 3689, 4413, 2986, 2945, 3180, 2429, 2992, 3585, 4252, 4947, 2119, 2871, 1808, 3794, 6869, 13803, 8644, 14243, 13159, 8743, 6436, 31746]}</script></div>
+    <div class="chart-legend">
+      <span><span class="leg-line" style="background:#2563eb;"></span>收盤價</span>
+      <span><span class="leg-line" style="background:#f59e0b;"></span>MA5</span>
+      <span><span class="leg-dash"></span>MA20</span>
+    </div>
+  </div>
+  <div class="section-title">💼 法人籌碼</div>
+  <div class="analysis">🌍 外資：連買 6 日（單日最高 10,855 張），大規模買超，外資高度積極。<br>🚨 出場警示：✅ 持續偏多</div>
+  <div class="section-title">📰 最新新聞</div>
+  <div class="news-box">
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】精成科 2026年3月合併營收33.65億元 年增78.22%</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】精成科更正子公司115年02月衍生性商品交易資訊</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】精成科代子公司GBM Electronics (M) Sdn. Bhd.公告向關係人取得不動產使用權資產</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】精成科 2026年2月合併營收27.42億元 年增71.02%</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】代子公司昆山元茂電子科技有限公司公告，配合政策性搬遷擬簽署企業搬遷協議書(補充公告)</div>
+    
+  </div>
+</div>
+
+<div class="card" style=""
+  data-vol="11569"
+  data-ratio="2.27"
+  data-fdays="6"
+  data-price="16.0"
+  data-code="6226"
+  data-name="光鼎">
+  
+  <div class="card-header">
+    <div>
+      <span class="code">6226</span>
+      <span class="name">光鼎</span>
+      
+    </div>
+    <div class="right">
+      <span class="price">NT$ 16.0</span>
+      <span class="badge">外資✅</span>
+      <span class="warn warn-ok">✅ 持續偏多</span>
+    </div>
+  </div>
+  <div class="metrics">
+    <div class="metric"><div class="m-label">成交量</div><div class="m-val">11,569 張</div></div>
+    <div class="metric"><div class="m-label">量比</div><div class="m-val">2.27x</div></div>
+    <div class="metric"><div class="m-label">外資連買</div><div class="m-val">6 日</div></div>
+    <div class="metric"><div class="m-label">投信連買</div><div class="m-val">0 日</div></div>
+    <div class="metric"><div class="m-label">MA5</div><div class="m-val">13.85</div></div>
+    <div class="metric"><div class="m-label">MA20</div><div class="m-val">13.09</div></div>
+  </div>
+  <div class="section-title">📐 技術面解讀</div>
+  <div class="analysis">📐 均線：MA5(13.85) 高於 MA20(13.09) 0.76元（5.8%），均線強勢擴張，多頭格局確立。<br>📊 MACD：MACD柱狀體剛翻正，動能初步轉強（柱狀體 0.1539）。<br>📦 成交量：明顯放量，買盤積極進場（量比 2.27x，當日 11,569 張）。</div>
+  <div class="chart-wrap">
+    <div class="chart-title">📈 近60日走勢（收盤價 / MA5 / MA20）</div>
+    <div style="position:relative;height:180px;width:100%;overflow:hidden;"><div style="position:relative;height:180px;width:100%;overflow:hidden;"><canvas id="chart-6226" class="scan-chart"></canvas></div><script id="cd-chart-6226" type="application/json">{"dates": ["01/13", "01/14", "01/15", "01/16", "01/19", "01/20", "01/21", "01/22", "01/23", "01/26", "01/27", "01/28", "01/29", "01/30", "02/02", "02/03", "02/04", "02/05", "02/06", "02/09", "02/10", "02/11", "02/23", "02/24", "02/25", "02/26", "03/02", "03/03", "03/04", "03/05", "03/06", "03/09", "03/10", "03/11", "03/12", "03/13", "03/16", "03/17", "03/18", "03/19", "03/20", "03/23", "03/24", "03/25", "03/26", "03/27", "03/30", "03/31", "04/01", "04/02", "04/07", "04/08", "04/09", "04/10", "04/13", "04/14", "04/15", "04/16", "04/17", "04/20"], "close": [7.45, 7.57, 8.32, 9.15, 10.05, 10.0, 9.72, 9.55, 9.1, 9.67, 9.35, 9.12, 8.93, 8.77, 8.7, 8.63, 9.49, 9.03, 8.84, 8.77, 8.83, 8.79, 8.87, 8.92, 8.94, 9.27, 9.14, 8.96, 8.61, 8.8, 8.84, 8.19, 8.5, 8.73, 9.18, 10.05, 11.05, 12.15, 13.35, 14.65, 14.85, 13.45, 13.5, 13.2, 12.45, 12.15, 11.75, 12.7, 12.9, 12.0, 11.2, 12.3, 13.5, 13.2, 13.4, 12.55, 12.8, 13.3, 14.6, 16.0], "ma5": [7.49, 7.5, 7.67, 8.01, 8.51, 9.02, 9.45, 9.69, 9.68, 9.61, 9.48, 9.36, 9.23, 9.17, 8.97, 8.83, 8.9, 8.92, 8.94, 8.95, 8.99, 8.85, 8.82, 8.84, 8.87, 8.96, 9.03, 9.05, 8.98, 8.96, 8.87, 8.68, 8.59, 8.61, 8.69, 8.93, 9.5, 10.23, 11.16, 12.25, 13.21, 13.69, 13.96, 13.93, 13.49, 12.95, 12.61, 12.45, 12.39, 12.3, 12.11, 12.22, 12.38, 12.44, 12.72, 12.99, 13.09, 13.05, 13.33, 13.85], "ma20": [7.54, 7.55, 7.56, 7.64, 7.77, 7.9, 8.0, 8.09, 8.16, 8.26, 8.34, 8.42, 8.5, 8.56, 8.64, 8.71, 8.8, 8.88, 8.95, 9.01, 9.08, 9.14, 9.17, 9.16, 9.1, 9.06, 9.04, 9.01, 8.98, 8.94, 8.91, 8.87, 8.84, 8.84, 8.87, 8.94, 9.02, 9.17, 9.4, 9.69, 9.99, 10.22, 10.46, 10.67, 10.85, 10.99, 11.12, 11.31, 11.52, 11.68, 11.8, 12.01, 12.26, 12.48, 12.69, 12.81, 12.9, 12.96, 13.02, 13.09], "vol": [226, 208, 1563, 2997, 2686, 4200, 1409, 1019, 1115, 894, 705, 713, 379, 509, 214, 244, 964, 992, 519, 221, 152, 252, 293, 328, 385, 701, 447, 386, 450, 302, 238, 239, 160, 195, 668, 2283, 2099, 1780, 3950, 18978, 11014, 2591, 2040, 1590, 1351, 1141, 775, 1766, 1286, 1136, 2114, 1035, 4291, 4671, 2632, 2670, 2007, 2026, 7215, 11569]}</script></div>
+    <div class="chart-legend">
+      <span><span class="leg-line" style="background:#2563eb;"></span>收盤價</span>
+      <span><span class="leg-line" style="background:#f59e0b;"></span>MA5</span>
+      <span><span class="leg-dash"></span>MA20</span>
+    </div>
+  </div>
+  <div class="section-title">💼 法人籌碼</div>
+  <div class="analysis">🌍 外資：連買 6 日（單日最高 1,305 張），小額但持續，外資默默佈局。<br>🚨 出場警示：✅ 持續偏多</div>
+  <div class="section-title">📰 最新新聞</div>
+  <div class="news-box">
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】光鼎 2026年3月合併營收5551.1萬元 年增-0.8%</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】係因光鼎有價證券於集中交易市場達公布注意交易資訊標準，故公布相關財務業務等重大訊息，以利投資人區別瞭解。</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】光鼎 2026年2月合併營收4101.8萬元 年增-11.06%</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】光鼎董事會決議不發放股利</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】光鼎董事會決議召開115年股東會召開事宜</div>
+    
+  </div>
+</div>
+
+<div class="card" style=""
+  data-vol="11935"
+  data-ratio="1.9"
+  data-fdays="6"
+  data-price="81.0"
+  data-code="6205"
+  data-name="詮欣">
+  
+  <div class="card-header">
+    <div>
+      <span class="code">6205</span>
+      <span class="name">詮欣</span>
+      
+    </div>
+    <div class="right">
+      <span class="price">NT$ 81.0</span>
+      <span class="badge">外資✅</span>
+      <span class="warn warn-ok">✅ 持續偏多</span>
+    </div>
+  </div>
+  <div class="metrics">
+    <div class="metric"><div class="m-label">成交量</div><div class="m-val">11,935 張</div></div>
+    <div class="metric"><div class="m-label">量比</div><div class="m-val">1.9x</div></div>
+    <div class="metric"><div class="m-label">外資連買</div><div class="m-val">6 日</div></div>
+    <div class="metric"><div class="m-label">投信連買</div><div class="m-val">0 日</div></div>
+    <div class="metric"><div class="m-label">MA5</div><div class="m-val">72.34</div></div>
+    <div class="metric"><div class="m-label">MA20</div><div class="m-val">60.28</div></div>
+  </div>
+  <div class="section-title">📐 技術面解讀</div>
+  <div class="analysis">📐 均線：MA5(72.34) 高於 MA20(60.28) 12.06元（20.0%），均線強勢擴張，多頭格局確立。<br>📊 MACD：MACD柱狀體強勁擴張，動能極強（柱狀體 2.4423）。<br>📦 成交量：溫和放量，穩健推升（量比 1.9x，當日 11,935 張）。</div>
+  <div class="chart-wrap">
+    <div class="chart-title">📈 近60日走勢（收盤價 / MA5 / MA20）</div>
+    <div style="position:relative;height:180px;width:100%;overflow:hidden;"><div style="position:relative;height:180px;width:100%;overflow:hidden;"><canvas id="chart-6205" class="scan-chart"></canvas></div><script id="cd-chart-6205" type="application/json">{"dates": ["01/13", "01/14", "01/15", "01/16", "01/19", "01/20", "01/21", "01/22", "01/23", "01/26", "01/27", "01/28", "01/29", "01/30", "02/02", "02/03", "02/04", "02/05", "02/06", "02/09", "02/10", "02/11", "02/23", "02/24", "02/25", "02/26", "03/02", "03/03", "03/04", "03/05", "03/06", "03/09", "03/10", "03/11", "03/12", "03/13", "03/16", "03/17", "03/18", "03/19", "03/20", "03/23", "03/24", "03/25", "03/26", "03/27", "03/30", "03/31", "04/01", "04/02", "04/07", "04/08", "04/09", "04/10", "04/13", "04/14", "04/15", "04/16", "04/17", "04/20"], "close": [61.6, 66.5, 62.2, 57.8, 56.5, 60.2, 58.0, 57.7, 56.2, 55.3, 55.2, 56.0, 52.8, 51.1, 50.7, 51.5, 51.8, 50.1, 49.0, 48.55, 49.05, 48.6, 49.9, 51.3, 49.55, 50.5, 51.0, 56.1, 53.9, 53.0, 53.8, 49.95, 50.9, 52.5, 51.9, 57.0, 54.5, 59.0, 56.8, 57.4, 59.1, 58.0, 62.0, 59.6, 55.7, 56.3, 54.5, 50.8, 53.6, 51.8, 51.8, 54.5, 57.0, 56.8, 62.4, 68.5, 69.0, 68.2, 75.0, 81.0], "ma5": [60.46, 61.98, 62.4, 61.92, 60.92, 60.64, 58.94, 58.04, 57.72, 57.48, 56.48, 56.08, 55.1, 54.08, 53.16, 52.42, 51.58, 51.04, 50.62, 50.19, 49.7, 49.06, 49.02, 49.48, 49.68, 49.97, 50.45, 51.69, 52.21, 52.9, 53.56, 53.35, 52.31, 52.03, 51.81, 52.45, 53.36, 54.98, 55.84, 56.94, 57.36, 58.06, 58.66, 59.22, 58.88, 58.32, 57.62, 55.38, 54.18, 53.4, 52.5, 52.5, 53.74, 54.38, 56.5, 59.84, 62.74, 64.98, 68.62, 72.34], "ma20": [51.17, 52.46, 53.62, 54.56, 55.46, 56.53, 57.49, 58.38, 58.99, 59.33, 59.43, 59.31, 58.85, 58.35, 57.92, 57.5, 57.14, 56.64, 56.08, 55.44, 54.81, 53.91, 53.3, 52.97, 52.63, 52.14, 51.79, 51.71, 51.6, 51.48, 51.41, 51.11, 51.01, 51.08, 51.14, 51.42, 51.55, 52.0, 52.39, 52.83, 53.34, 53.81, 54.41, 54.83, 55.13, 55.42, 55.6, 55.33, 55.32, 55.26, 55.16, 55.38, 55.69, 55.9, 56.43, 57.0, 57.73, 58.19, 59.1, 60.28], "vol": [1072, 1356, 1386, 3352, 1651, 3564, 2983, 1049, 1838, 547, 533, 496, 856, 705, 515, 282, 299, 288, 499, 372, 319, 203, 276, 372, 502, 366, 389, 999, 4513, 1907, 1279, 722, 397, 715, 319, 1205, 1953, 1908, 1376, 2350, 2700, 1462, 3190, 5348, 2110, 945, 882, 1062, 1133, 555, 523, 947, 1601, 1475, 3575, 5817, 4968, 1918, 6706, 11935]}</script></div>
+    <div class="chart-legend">
+      <span><span class="leg-line" style="background:#2563eb;"></span>收盤價</span>
+      <span><span class="leg-line" style="background:#f59e0b;"></span>MA5</span>
+      <span><span class="leg-dash"></span>MA20</span>
+    </div>
+  </div>
+  <div class="section-title">💼 法人籌碼</div>
+  <div class="analysis">🌍 外資：連買 6 日（單日最高 2,025 張），小額但持續，外資默默佈局。<br>🚨 出場警示：✅ 持續偏多</div>
+  <div class="section-title">📰 最新新聞</div>
+  <div class="news-box">
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】詮欣 2026年3月合併營收1億元 年增-16.67%</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】詮欣 2026年2月合併營收6894.8萬元 年增-35.92%</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】詮欣董事會決議辦理私募無擔保可轉換公司債</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】詮欣董事會決議辦理私募普通股</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】詮欣董事會決議114年05月28日股東常會通過之私募普通股及(或)無擔保可轉換公司債，剩餘私募股數額度不再繼續辦理</div>
+    
+  </div>
+</div>
+
+<div class="card" style=""
+  data-vol="2084"
+  data-ratio="1.53"
+  data-fdays="6"
+  data-price="13.4"
+  data-code="6164"
+  data-name="華興">
+  
+  <div class="card-header">
+    <div>
+      <span class="code">6164</span>
+      <span class="name">華興</span>
+      
+    </div>
+    <div class="right">
+      <span class="price">NT$ 13.4</span>
+      <span class="badge">外資✅</span>
+      <span class="warn warn-ok">✅ 持續偏多</span>
+    </div>
+  </div>
+  <div class="metrics">
+    <div class="metric"><div class="m-label">成交量</div><div class="m-val">2,084 張</div></div>
+    <div class="metric"><div class="m-label">量比</div><div class="m-val">1.53x</div></div>
+    <div class="metric"><div class="m-label">外資連買</div><div class="m-val">6 日</div></div>
+    <div class="metric"><div class="m-label">投信連買</div><div class="m-val">0 日</div></div>
+    <div class="metric"><div class="m-label">MA5</div><div class="m-val">12.89</div></div>
+    <div class="metric"><div class="m-label">MA20</div><div class="m-val">12.37</div></div>
+  </div>
+  <div class="section-title">📐 技術面解讀</div>
+  <div class="analysis">📐 均線：MA5(12.89) 高於 MA20(12.37) 0.52元（4.2%），均線多頭排列穩固，上升趨勢明確。<br>📊 MACD：MACD柱狀體剛翻正，動能初步轉強（柱狀體 0.1325）。<br>📦 成交量：溫和放量，穩健推升（量比 1.53x，當日 2,084 張）。</div>
+  <div class="chart-wrap">
+    <div class="chart-title">📈 近60日走勢（收盤價 / MA5 / MA20）</div>
+    <div style="position:relative;height:180px;width:100%;overflow:hidden;"><div style="position:relative;height:180px;width:100%;overflow:hidden;"><canvas id="chart-6164" class="scan-chart"></canvas></div><script id="cd-chart-6164" type="application/json">{"dates": ["01/13", "01/14", "01/15", "01/16", "01/19", "01/20", "01/21", "01/22", "01/23", "01/26", "01/27", "01/28", "01/29", "01/30", "02/02", "02/03", "02/04", "02/05", "02/06", "02/09", "02/10", "02/11", "02/23", "02/24", "02/25", "02/26", "03/02", "03/03", "03/04", "03/05", "03/06", "03/09", "03/10", "03/11", "03/12", "03/13", "03/16", "03/17", "03/18", "03/19", "03/20", "03/23", "03/24", "03/25", "03/26", "03/27", "03/30", "03/31", "04/01", "04/02", "04/07", "04/08", "04/09", "04/10", "04/13", "04/14", "04/15", "04/16", "04/17", "04/20"], "close": [12.05, 12.35, 12.4, 12.45, 12.7, 12.75, 12.65, 12.8, 12.75, 12.95, 12.75, 12.55, 12.65, 12.55, 12.0, 12.1, 12.75, 12.5, 12.25, 12.1, 12.1, 12.05, 12.35, 12.35, 12.35, 12.4, 12.3, 12.0, 11.15, 11.75, 11.8, 11.25, 11.2, 11.6, 11.9, 12.55, 13.0, 13.3, 13.15, 13.05, 13.05, 12.35, 12.45, 12.65, 12.55, 12.4, 12.0, 11.6, 11.8, 11.6, 11.65, 12.2, 12.25, 12.2, 12.2, 12.3, 12.85, 12.9, 13.0, 13.4], "ma5": [12.21, 12.16, 12.2, 12.32, 12.39, 12.53, 12.59, 12.67, 12.73, 12.78, 12.78, 12.76, 12.73, 12.69, 12.5, 12.37, 12.41, 12.38, 12.32, 12.34, 12.34, 12.2, 12.17, 12.19, 12.24, 12.3, 12.35, 12.28, 12.04, 11.92, 11.8, 11.59, 11.43, 11.52, 11.55, 11.7, 12.05, 12.47, 12.78, 13.01, 13.11, 12.98, 12.81, 12.71, 12.61, 12.48, 12.41, 12.24, 12.07, 11.88, 11.73, 11.77, 11.9, 11.98, 12.1, 12.23, 12.36, 12.49, 12.65, 12.89], "ma20": [12.44, 12.5, 12.52, 12.48, 12.49, 12.5, 12.49, 12.5, 12.51, 12.53, 12.53, 12.51, 12.5, 12.5, 12.5, 12.47, 12.48, 12.5, 12.52, 12.5, 12.51, 12.49, 12.49, 12.48, 12.47, 12.45, 12.43, 12.39, 12.31, 12.25, 12.2, 12.14, 12.07, 12.02, 12.01, 12.04, 12.05, 12.09, 12.13, 12.18, 12.23, 12.24, 12.25, 12.26, 12.27, 12.27, 12.26, 12.24, 12.27, 12.26, 12.26, 12.3, 12.36, 12.38, 12.4, 12.39, 12.38, 12.36, 12.35, 12.37], "vol": [397, 607, 571, 1116, 1243, 912, 1324, 1103, 1123, 837, 749, 607, 442, 588, 506, 411, 1323, 716, 633, 309, 170, 265, 445, 338, 666, 523, 322, 502, 669, 368, 263, 381, 175, 317, 554, 5263, 4459, 3201, 1276, 1035, 2318, 798, 845, 899, 505, 396, 362, 378, 162, 287, 305, 663, 918, 602, 452, 304, 1686, 1833, 905, 2084]}</script></div>
+    <div class="chart-legend">
+      <span><span class="leg-line" style="background:#2563eb;"></span>收盤價</span>
+      <span><span class="leg-line" style="background:#f59e0b;"></span>MA5</span>
+      <span><span class="leg-dash"></span>MA20</span>
+    </div>
+  </div>
+  <div class="section-title">💼 法人籌碼</div>
+  <div class="analysis">🌍 外資：連買 6 日（單日最高 634 張），小額但持續，外資默默佈局。<br>🚨 出場警示：✅ 持續偏多</div>
+  <div class="section-title">📰 最新新聞</div>
+  <div class="news-box">
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】華興115年03月份合併自結損益</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】華興 2026年3月合併營收6457萬元 年增-26.99%</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】華興115年02月份合併自結損益</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】華興董事會通過114年度合併財務報告</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】華興董事會決議召開115年股東常會</div>
+    
+  </div>
+</div>
+
+<div class="card" style=""
+  data-vol="2138"
+  data-ratio="1.73"
+  data-fdays="6"
+  data-price="168.0"
+  data-code="6890"
+  data-name="來億-KY">
+  
+  <div class="card-header">
+    <div>
+      <span class="code">6890</span>
+      <span class="name">來億-KY</span>
+      
+    </div>
+    <div class="right">
+      <span class="price">NT$ 168.0</span>
+      <span class="badge">外資✅</span>
+      <span class="warn warn-ok">✅ 持續偏多</span>
+    </div>
+  </div>
+  <div class="metrics">
+    <div class="metric"><div class="m-label">成交量</div><div class="m-val">2,138 張</div></div>
+    <div class="metric"><div class="m-label">量比</div><div class="m-val">1.73x</div></div>
+    <div class="metric"><div class="m-label">外資連買</div><div class="m-val">6 日</div></div>
+    <div class="metric"><div class="m-label">投信連買</div><div class="m-val">0 日</div></div>
+    <div class="metric"><div class="m-label">MA5</div><div class="m-val">165.0</div></div>
+    <div class="metric"><div class="m-label">MA20</div><div class="m-val">163.25</div></div>
+  </div>
+  <div class="section-title">📐 技術面解讀</div>
+  <div class="analysis">📐 均線：MA5(165.0) 高於 MA20(163.25) 1.75元（1.1%），黃金交叉剛形成，趨勢轉強初期。<br>📊 MACD：MACD柱狀體強勁擴張，動能極強（柱狀體 3.1013）。<br>📦 成交量：溫和放量，穩健推升（量比 1.73x，當日 2,138 張）。</div>
+  <div class="chart-wrap">
+    <div class="chart-title">📈 近60日走勢（收盤價 / MA5 / MA20）</div>
+    <div style="position:relative;height:180px;width:100%;overflow:hidden;"><div style="position:relative;height:180px;width:100%;overflow:hidden;"><canvas id="chart-6890" class="scan-chart"></canvas></div><script id="cd-chart-6890" type="application/json">{"dates": ["01/13", "01/14", "01/15", "01/16", "01/19", "01/20", "01/21", "01/22", "01/23", "01/26", "01/27", "01/28", "01/29", "01/30", "02/02", "02/03", "02/04", "02/05", "02/06", "02/09", "02/10", "02/11", "02/23", "02/24", "02/25", "02/26", "03/02", "03/03", "03/04", "03/05", "03/06", "03/09", "03/10", "03/11", "03/12", "03/13", "03/16", "03/17", "03/18", "03/19", "03/20", "03/23", "03/24", "03/25", "03/26", "03/27", "03/30", "03/31", "04/01", "04/02", "04/07", "04/08", "04/09", "04/10", "04/13", "04/14", "04/15", "04/16", "04/17", "04/20"], "close": [252.0, 255.0, 248.5, 245.0, 239.0, 243.0, 237.5, 244.5, 239.0, 238.0, 242.0, 234.5, 231.5, 225.0, 225.5, 215.0, 218.0, 215.0, 206.0, 209.0, 209.0, 199.0, 210.0, 202.0, 197.5, 203.0, 195.5, 190.0, 181.5, 181.0, 178.0, 169.5, 171.5, 163.5, 160.0, 162.5, 172.0, 174.5, 174.0, 171.5, 172.5, 181.5, 166.5, 164.5, 165.5, 165.5, 158.0, 160.5, 167.5, 168.0, 157.5, 159.5, 150.5, 151.5, 151.0, 153.0, 156.5, 172.0, 175.5, 168.0], "ma5": [247.6, 250.8, 252.3, 251.2, 247.9, 246.1, 242.6, 241.8, 240.6, 240.4, 240.2, 239.6, 237.0, 234.2, 231.7, 226.3, 223.0, 219.7, 215.9, 212.6, 211.4, 207.6, 206.6, 205.8, 203.5, 202.3, 201.6, 197.6, 193.5, 190.2, 185.2, 180.0, 176.3, 172.7, 168.5, 165.4, 165.9, 166.5, 168.6, 170.9, 172.9, 174.8, 173.2, 171.3, 170.1, 168.7, 164.0, 162.8, 163.4, 163.9, 162.3, 162.6, 160.6, 157.4, 154.0, 153.1, 152.5, 156.8, 161.6, 165.0], "ma20": [249.05, 248.95, 249.05, 249.15, 248.93, 248.38, 247.28, 246.65, 245.95, 245.1, 244.5, 243.7, 242.75, 241.47, 241.05, 240.05, 239.0, 237.7, 235.47, 233.15, 231.0, 228.2, 226.28, 224.12, 222.05, 220.05, 217.95, 215.22, 212.35, 209.5, 206.3, 203.05, 200.05, 196.97, 193.7, 191.07, 188.78, 186.75, 185.15, 183.28, 181.45, 180.57, 178.4, 176.53, 174.93, 173.05, 171.18, 169.7, 169.0, 168.35, 167.32, 166.82, 165.78, 165.18, 164.72, 164.25, 163.47, 163.35, 163.43, 163.25], "vol": [921, 471, 579, 289, 523, 349, 539, 291, 359, 376, 643, 1010, 534, 998, 876, 1321, 648, 770, 1080, 755, 394, 1914, 969, 644, 923, 412, 628, 872, 1006, 866, 714, 788, 397, 1118, 771, 595, 916, 899, 799, 859, 1058, 1708, 1223, 713, 528, 257, 722, 373, 396, 665, 658, 540, 1007, 478, 439, 544, 776, 1291, 1441, 2138]}</script></div>
+    <div class="chart-legend">
+      <span><span class="leg-line" style="background:#2563eb;"></span>收盤價</span>
+      <span><span class="leg-line" style="background:#f59e0b;"></span>MA5</span>
+      <span><span class="leg-dash"></span>MA20</span>
+    </div>
+  </div>
+  <div class="section-title">💼 法人籌碼</div>
+  <div class="analysis">🌍 外資：連買 6 日（單日最高 1,042 張），小額但持續，外資默默佈局。<br>🚨 出場警示：✅ 持續偏多</div>
+  <div class="section-title">📰 最新新聞</div>
+  <div class="news-box">
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】來億-KY 2026年3月合併營收27.8億元 年增-20.59%</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】來億-KY受邀參加Jefferies Asia Forum香港論壇</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】來億-KY 2026年2月合併營收17.76億元 年增-29.43%</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】來億-KY將於115/03/10(三)14:30召開法人說明會</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】來億-KY民國114年度合併財務報告業經董事會決議通過</div>
+    
+  </div>
+</div>
+
+<div class="card" style=""
+  data-vol="2309"
+  data-ratio="2.92"
+  data-fdays="6"
+  data-price="59.9"
+  data-code="3588"
+  data-name="通嘉">
+  
+  <div class="card-header">
+    <div>
+      <span class="code">3588</span>
+      <span class="name">通嘉</span>
+      
+    </div>
+    <div class="right">
+      <span class="price">NT$ 59.9</span>
+      <span class="badge">外資✅</span>
+      <span class="warn warn-ok">✅ 持續偏多</span>
+    </div>
+  </div>
+  <div class="metrics">
+    <div class="metric"><div class="m-label">成交量</div><div class="m-val">2,309 張</div></div>
+    <div class="metric"><div class="m-label">量比</div><div class="m-val">2.92x</div></div>
+    <div class="metric"><div class="m-label">外資連買</div><div class="m-val">6 日</div></div>
+    <div class="metric"><div class="m-label">投信連買</div><div class="m-val">0 日</div></div>
+    <div class="metric"><div class="m-label">MA5</div><div class="m-val">55.0</div></div>
+    <div class="metric"><div class="m-label">MA20</div><div class="m-val">50.82</div></div>
+  </div>
+  <div class="section-title">📐 技術面解讀</div>
+  <div class="analysis">📐 均線：MA5(55.0) 高於 MA20(50.82) 4.18元（8.2%），均線強勢擴張，多頭格局確立。<br>📊 MACD：MACD柱狀體持續上揚，動能健康（柱狀體 1.0248）。<br>📦 成交量：明顯放量，買盤積極進場（量比 2.92x，當日 2,309 張）。</div>
+  <div class="chart-wrap">
+    <div class="chart-title">📈 近60日走勢（收盤價 / MA5 / MA20）</div>
+    <div style="position:relative;height:180px;width:100%;overflow:hidden;"><div style="position:relative;height:180px;width:100%;overflow:hidden;"><canvas id="chart-3588" class="scan-chart"></canvas></div><script id="cd-chart-3588" type="application/json">{"dates": ["01/13", "01/14", "01/15", "01/16", "01/19", "01/20", "01/21", "01/22", "01/23", "01/26", "01/27", "01/28", "01/29", "01/30", "02/02", "02/03", "02/04", "02/05", "02/06", "02/09", "02/10", "02/11", "02/23", "02/24", "02/25", "02/26", "03/02", "03/03", "03/04", "03/05", "03/06", "03/09", "03/10", "03/11", "03/12", "03/13", "03/16", "03/17", "03/18", "03/19", "03/20", "03/23", "03/24", "03/25", "03/26", "03/27", "03/30", "03/31", "04/01", "04/02", "04/07", "04/08", "04/09", "04/10", "04/13", "04/14", "04/15", "04/16", "04/17", "04/20"], "close": [52.2, 53.3, 52.3, 52.3, 52.5, 52.4, 52.9, 53.0, 55.0, 55.4, 57.2, 58.7, 54.2, 54.1, 50.9, 52.2, 52.4, 53.0, 50.7, 53.0, 53.1, 52.0, 52.3, 53.4, 52.0, 52.3, 52.2, 51.2, 47.55, 49.7, 49.25, 46.2, 47.05, 48.7, 49.9, 49.6, 50.4, 50.7, 50.7, 49.6, 50.9, 49.7, 49.45, 50.2, 49.35, 49.55, 48.55, 46.3, 47.15, 46.35, 46.5, 51.1, 52.3, 52.1, 51.9, 53.2, 53.3, 54.0, 54.6, 59.9], "ma5": [52.06, 52.86, 52.48, 52.54, 52.52, 52.56, 52.48, 52.62, 53.16, 53.74, 54.7, 55.86, 56.1, 55.92, 55.02, 54.02, 52.76, 52.52, 51.84, 52.26, 52.44, 52.36, 52.22, 52.76, 52.56, 52.4, 52.44, 52.22, 51.05, 50.59, 49.98, 48.78, 47.95, 48.18, 48.22, 48.29, 49.13, 49.86, 50.26, 50.2, 50.46, 50.32, 50.07, 49.97, 49.92, 49.65, 49.42, 48.79, 48.18, 47.58, 46.97, 47.48, 48.68, 49.67, 50.78, 52.12, 52.56, 52.9, 53.4, 55.0], "ma20": [49.23, 49.49, 49.69, 49.87, 50.11, 50.35, 50.53, 50.76, 51.12, 51.47, 51.91, 52.44, 52.73, 52.98, 53.13, 53.34, 53.49, 53.43, 53.37, 53.39, 53.43, 53.37, 53.37, 53.42, 53.4, 53.39, 53.36, 53.27, 52.89, 52.61, 52.21, 51.59, 51.23, 50.96, 50.91, 50.78, 50.68, 50.56, 50.56, 50.39, 50.28, 50.17, 50.03, 49.87, 49.73, 49.6, 49.41, 49.17, 49.15, 48.98, 48.84, 49.09, 49.35, 49.52, 49.62, 49.8, 49.94, 50.11, 50.3, 50.82], "vol": [710, 607, 367, 406, 509, 498, 696, 664, 1519, 642, 3208, 2151, 1344, 728, 561, 871, 331, 571, 528, 725, 948, 443, 391, 327, 418, 376, 630, 308, 642, 269, 180, 248, 276, 81, 242, 172, 300, 212, 169, 357, 243, 295, 201, 179, 166, 186, 159, 293, 69, 124, 97, 754, 697, 360, 149, 532, 278, 426, 414, 2309]}</script></div>
+    <div class="chart-legend">
+      <span><span class="leg-line" style="background:#2563eb;"></span>收盤價</span>
+      <span><span class="leg-line" style="background:#f59e0b;"></span>MA5</span>
+      <span><span class="leg-dash"></span>MA20</span>
+    </div>
+  </div>
+  <div class="section-title">💼 法人籌碼</div>
+  <div class="analysis">🌍 外資：連買 6 日（單日最高 597 張），小額但持續，外資默默佈局。<br>🚨 出場警示：✅ 持續偏多</div>
+  <div class="section-title">📰 最新新聞</div>
+  <div class="news-box">
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】通嘉董事會決議召開115年股東常會事宜(新增召集事由)</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】通嘉董事會決議股利分派</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】通嘉 2026年3月合併營收1.51億元 年增28.73%</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】通嘉註銷限制員工權利新股21,000股減資變更登記完成</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】通嘉 2026年2月合併營收1.11億元 年增2.27%</div>
+    
+  </div>
+</div>
+
+<div class="card" style=""
+  data-vol="6177"
+  data-ratio="2.22"
+  data-fdays="6"
+  data-price="100.5"
+  data-code="8103"
+  data-name="瀚荃">
+  
+  <div class="card-header">
+    <div>
+      <span class="code">8103</span>
+      <span class="name">瀚荃</span>
+      
+    </div>
+    <div class="right">
+      <span class="price">NT$ 100.5</span>
+      <span class="badge">外資✅</span>
+      <span class="warn warn-ok">✅ 持續偏多</span>
+    </div>
+  </div>
+  <div class="metrics">
+    <div class="metric"><div class="m-label">成交量</div><div class="m-val">6,177 張</div></div>
+    <div class="metric"><div class="m-label">量比</div><div class="m-val">2.22x</div></div>
+    <div class="metric"><div class="m-label">外資連買</div><div class="m-val">6 日</div></div>
+    <div class="metric"><div class="m-label">投信連買</div><div class="m-val">0 日</div></div>
+    <div class="metric"><div class="m-label">MA5</div><div class="m-val">93.72</div></div>
+    <div class="metric"><div class="m-label">MA20</div><div class="m-val">85.91</div></div>
+  </div>
+  <div class="section-title">📐 技術面解讀</div>
+  <div class="analysis">📐 均線：MA5(93.72) 高於 MA20(85.91) 7.81元（9.1%），均線強勢擴張，多頭格局確立。<br>📊 MACD：MACD柱狀體持續上揚，動能健康（柱狀體 1.9792）。<br>📦 成交量：明顯放量，買盤積極進場（量比 2.22x，當日 6,177 張）。</div>
+  <div class="chart-wrap">
+    <div class="chart-title">📈 近60日走勢（收盤價 / MA5 / MA20）</div>
+    <div style="position:relative;height:180px;width:100%;overflow:hidden;"><div style="position:relative;height:180px;width:100%;overflow:hidden;"><canvas id="chart-8103" class="scan-chart"></canvas></div><script id="cd-chart-8103" type="application/json">{"dates": ["01/13", "01/14", "01/15", "01/16", "01/19", "01/20", "01/21", "01/22", "01/23", "01/26", "01/27", "01/28", "01/29", "01/30", "02/02", "02/03", "02/04", "02/05", "02/06", "02/09", "02/10", "02/11", "02/23", "02/24", "02/25", "02/26", "03/02", "03/03", "03/04", "03/05", "03/06", "03/09", "03/10", "03/11", "03/12", "03/13", "03/16", "03/17", "03/18", "03/19", "03/20", "03/23", "03/24", "03/25", "03/26", "03/27", "03/30", "03/31", "04/01", "04/02", "04/07", "04/08", "04/09", "04/10", "04/13", "04/14", "04/15", "04/16", "04/17", "04/20"], "close": [92.5, 93.5, 95.0, 93.9, 98.5, 98.4, 96.1, 101.5, 96.0, 95.6, 96.2, 95.0, 88.8, 85.5, 86.9, 90.7, 92.7, 87.2, 95.0, 96.4, 99.7, 109.5, 98.6, 93.3, 96.7, 99.9, 100.5, 96.0, 89.0, 92.4, 91.5, 82.4, 87.8, 87.4, 87.3, 85.4, 86.5, 85.3, 88.0, 85.0, 85.3, 83.0, 81.6, 85.8, 82.3, 84.3, 81.2, 77.9, 80.7, 79.3, 79.2, 84.1, 88.6, 88.6, 87.7, 90.5, 92.3, 92.2, 93.1, 100.5], "ma5": [94.66, 94.78, 94.42, 94.18, 94.68, 95.86, 96.38, 97.68, 98.1, 97.52, 97.08, 96.86, 94.32, 92.22, 90.48, 89.38, 88.92, 88.6, 90.5, 92.4, 94.2, 97.56, 99.84, 99.5, 99.56, 99.6, 97.8, 97.28, 96.42, 95.56, 93.88, 90.26, 88.62, 88.3, 87.28, 86.06, 86.88, 86.38, 86.5, 86.04, 86.02, 85.32, 84.58, 84.14, 83.6, 83.4, 83.04, 82.3, 81.28, 80.68, 79.66, 80.24, 82.38, 83.96, 85.64, 87.9, 89.54, 90.26, 91.16, 93.72], "ma20": [89.13, 89.29, 89.64, 90.04, 90.65, 91.04, 91.33, 92.14, 92.76, 93.2, 93.9, 94.35, 94.5, 94.4, 94.35, 94.25, 94.23, 93.75, 93.75, 93.77, 94.13, 94.93, 95.11, 95.08, 94.99, 95.06, 95.28, 95.01, 94.66, 94.5, 94.26, 93.63, 93.58, 93.68, 93.7, 93.44, 93.13, 93.03, 92.68, 92.11, 91.39, 90.07, 89.22, 88.84, 88.12, 87.34, 86.38, 85.47, 85.06, 84.4, 83.79, 83.87, 83.91, 83.97, 83.99, 84.25, 84.54, 84.88, 85.13, 85.91], "vol": [2708, 2702, 1785, 3528, 4575, 4541, 3355, 8563, 3954, 2228, 1193, 1908, 3520, 4784, 1656, 2220, 1189, 1347, 4276, 5292, 4133, 6243, 9140, 7193, 3950, 10924, 3947, 2678, 2472, 3018, 975, 1945, 2625, 2122, 1544, 1017, 1045, 1194, 2436, 1370, 1171, 974, 695, 622, 1005, 597, 541, 1772, 431, 481, 364, 960, 2109, 2097, 1250, 1474, 2060, 2009, 2213, 6177]}</script></div>
+    <div class="chart-legend">
+      <span><span class="leg-line" style="background:#2563eb;"></span>收盤價</span>
+      <span><span class="leg-line" style="background:#f59e0b;"></span>MA5</span>
+      <span><span class="leg-dash"></span>MA20</span>
+    </div>
+  </div>
+  <div class="section-title">💼 法人籌碼</div>
+  <div class="analysis">🌍 外資：連買 6 日（單日最高 2,181 張），小額但持續，外資默默佈局。<br>🚨 出場警示：✅ 持續偏多</div>
+  <div class="section-title">📰 最新新聞</div>
+  <div class="news-box">
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】瀚荃受邀參加 凱基證券 舉辦之 2026投資論壇</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】瀚荃 2026年3月合併營收3.33億元 年增25.79%</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】瀚荃法人董事因轉讓持股超過選任時所持有之公司股份數額二分之一當然解任</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】瀚荃董事會決議114年度股利分派</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】瀚荃股份有限公司公開收購全宇昕科技股份有限公司（代號6651）普通股，本次收購對價已匯入受委任機構兆豐證券股份有限公司名下之公開收購專戶。</div>
+    
+  </div>
+</div>
+
+<div class="card" style=""
+  data-vol="10648"
+  data-ratio="2.23"
+  data-fdays="5"
+  data-price="34.3"
+  data-code="6141"
+  data-name="柏承">
+  
+  <div class="card-header">
+    <div>
+      <span class="code">6141</span>
+      <span class="name">柏承</span>
+      
+    </div>
+    <div class="right">
+      <span class="price">NT$ 34.3</span>
+      <span class="badge">外資✅</span>
+      <span class="warn warn-ok">✅ 持續偏多</span>
+    </div>
+  </div>
+  <div class="metrics">
+    <div class="metric"><div class="m-label">成交量</div><div class="m-val">10,648 張</div></div>
+    <div class="metric"><div class="m-label">量比</div><div class="m-val">2.23x</div></div>
+    <div class="metric"><div class="m-label">外資連買</div><div class="m-val">5 日</div></div>
+    <div class="metric"><div class="m-label">投信連買</div><div class="m-val">0 日</div></div>
+    <div class="metric"><div class="m-label">MA5</div><div class="m-val">28.65</div></div>
+    <div class="metric"><div class="m-label">MA20</div><div class="m-val">23.86</div></div>
+  </div>
+  <div class="section-title">📐 技術面解讀</div>
+  <div class="analysis">📐 均線：MA5(28.65) 高於 MA20(23.86) 4.79元（20.1%），均線強勢擴張，多頭格局確立。<br>📊 MACD：MACD柱狀體持續上揚，動能健康（柱狀體 0.8824）。<br>📦 成交量：明顯放量，買盤積極進場（量比 2.23x，當日 10,648 張）。</div>
+  <div class="chart-wrap">
+    <div class="chart-title">📈 近60日走勢（收盤價 / MA5 / MA20）</div>
+    <div style="position:relative;height:180px;width:100%;overflow:hidden;"><div style="position:relative;height:180px;width:100%;overflow:hidden;"><canvas id="chart-6141" class="scan-chart"></canvas></div><script id="cd-chart-6141" type="application/json">{"dates": ["01/13", "01/14", "01/15", "01/16", "01/19", "01/20", "01/21", "01/22", "01/23", "01/26", "01/27", "01/28", "01/29", "01/30", "02/02", "02/03", "02/04", "02/05", "02/06", "02/09", "02/10", "02/11", "02/23", "02/24", "02/25", "02/26", "03/02", "03/03", "03/04", "03/05", "03/06", "03/09", "03/10", "03/11", "03/12", "03/13", "03/16", "03/17", "03/18", "03/19", "03/20", "03/23", "03/24", "03/25", "03/26", "03/27", "03/30", "03/31", "04/01", "04/02", "04/07", "04/08", "04/09", "04/10", "04/13", "04/14", "04/15", "04/16", "04/17", "04/20"], "close": [11.7, 11.55, 11.7, 11.65, 11.85, 11.6, 11.65, 12.0, 11.7, 11.9, 11.7, 11.85, 11.45, 11.2, 10.9, 10.95, 11.15, 11.1, 10.7, 10.6, 10.65, 10.7, 11.15, 11.25, 11.3, 12.4, 13.6, 14.95, 16.4, 18.0, 17.95, 16.8, 17.8, 18.1, 18.2, 20.0, 22.0, 24.2, 26.0, 28.3, 25.95, 23.4, 21.1, 23.0, 21.4, 22.1, 21.8, 19.8, 20.9, 20.95, 19.95, 21.9, 24.05, 24.1, 23.55, 23.5, 25.85, 28.4, 31.2, 34.3], "ma5": [11.67, 11.84, 11.83, 11.74, 11.69, 11.67, 11.69, 11.75, 11.76, 11.77, 11.79, 11.83, 11.72, 11.62, 11.42, 11.27, 11.13, 11.06, 10.96, 10.9, 10.84, 10.75, 10.76, 10.87, 11.01, 11.36, 11.94, 12.7, 13.73, 15.07, 16.18, 16.82, 17.39, 17.73, 17.77, 18.18, 19.22, 20.5, 22.08, 24.1, 25.29, 25.57, 24.95, 24.35, 22.97, 22.2, 21.88, 21.62, 21.2, 21.11, 20.68, 20.7, 21.55, 22.19, 22.71, 23.42, 24.21, 25.08, 26.5, 28.65], "ma20": [11.13, 11.12, 11.15, 11.18, 11.22, 11.23, 11.25, 11.3, 11.33, 11.38, 11.42, 11.47, 11.51, 11.55, 11.57, 11.6, 11.62, 11.59, 11.52, 11.44, 11.39, 11.35, 11.32, 11.3, 11.27, 11.31, 11.41, 11.56, 11.79, 12.1, 12.41, 12.66, 12.98, 13.32, 13.69, 14.14, 14.68, 15.34, 16.1, 16.99, 17.75, 18.39, 18.89, 19.47, 19.98, 20.46, 20.87, 21.11, 21.34, 21.49, 21.59, 21.84, 22.16, 22.46, 22.72, 22.9, 23.09, 23.3, 23.56, 23.86], "vol": [291, 371, 227, 281, 363, 286, 214, 656, 287, 398, 222, 261, 238, 276, 236, 175, 253, 77, 224, 195, 82, 211, 290, 305, 387, 1506, 2341, 1779, 4051, 2319, 12036, 2714, 2050, 1793, 1845, 4021, 2660, 1304, 7840, 4142, 1974, 1145, 1215, 2856, 1434, 757, 625, 928, 819, 563, 2374, 2201, 3411, 3761, 2780, 2004, 2716, 1862, 6673, 10648]}</script></div>
+    <div class="chart-legend">
+      <span><span class="leg-line" style="background:#2563eb;"></span>收盤價</span>
+      <span><span class="leg-line" style="background:#f59e0b;"></span>MA5</span>
+      <span><span class="leg-dash"></span>MA20</span>
+    </div>
+  </div>
+  <div class="section-title">💼 法人籌碼</div>
+  <div class="analysis">🌍 外資：連買 5 日（單日最高 1,335 張），小額但持續，外資默默佈局。<br>🚨 出場警示：✅ 持續偏多</div>
+  <div class="section-title">📰 最新新聞</div>
+  <div class="news-box">
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】因柏承有價證券於集中交易市場達公布注意交易資訊標準，故公布相關財務業務等重大訊息，以利投資人區別瞭解</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】柏承 2026年3月合併營收1.95億元 年增9.42%</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】柏承董事會通過114年度合併財務報告</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】柏承董事會決議不分派股利</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】柏承累積虧損達實收資本額二分之一</div>
+    
+  </div>
+</div>
+
+<div class="card" style=""
+  data-vol="2726"
+  data-ratio="1.82"
+  data-fdays="6"
+  data-price="46.2"
+  data-code="8926"
+  data-name="台汽電">
+  
+  <div class="card-header">
+    <div>
+      <span class="code">8926</span>
+      <span class="name">台汽電</span>
+      
+    </div>
+    <div class="right">
+      <span class="price">NT$ 46.2</span>
+      <span class="badge">外資✅</span>
+      <span class="warn warn-ok">✅ 持續偏多</span>
+    </div>
+  </div>
+  <div class="metrics">
+    <div class="metric"><div class="m-label">成交量</div><div class="m-val">2,726 張</div></div>
+    <div class="metric"><div class="m-label">量比</div><div class="m-val">1.82x</div></div>
+    <div class="metric"><div class="m-label">外資連買</div><div class="m-val">6 日</div></div>
+    <div class="metric"><div class="m-label">投信連買</div><div class="m-val">0 日</div></div>
+    <div class="metric"><div class="m-label">MA5</div><div class="m-val">44.83</div></div>
+    <div class="metric"><div class="m-label">MA20</div><div class="m-val">44.27</div></div>
+  </div>
+  <div class="section-title">📐 技術面解讀</div>
+  <div class="analysis">📐 均線：MA5(44.83) 高於 MA20(44.27) 0.56元（1.3%），黃金交叉剛形成，趨勢轉強初期。<br>📊 MACD：MACD柱狀體剛翻正，動能初步轉強（柱狀體 0.2242）。<br>📦 成交量：溫和放量，穩健推升（量比 1.82x，當日 2,726 張）。</div>
+  <div class="chart-wrap">
+    <div class="chart-title">📈 近60日走勢（收盤價 / MA5 / MA20）</div>
+    <div style="position:relative;height:180px;width:100%;overflow:hidden;"><div style="position:relative;height:180px;width:100%;overflow:hidden;"><canvas id="chart-8926" class="scan-chart"></canvas></div><script id="cd-chart-8926" type="application/json">{"dates": ["01/13", "01/14", "01/15", "01/16", "01/19", "01/20", "01/21", "01/22", "01/23", "01/26", "01/27", "01/28", "01/29", "01/30", "02/02", "02/03", "02/04", "02/05", "02/06", "02/09", "02/10", "02/11", "02/23", "02/24", "02/25", "02/26", "03/02", "03/03", "03/04", "03/05", "03/06", "03/09", "03/10", "03/11", "03/12", "03/13", "03/16", "03/17", "03/18", "03/19", "03/20", "03/23", "03/24", "03/25", "03/26", "03/27", "03/30", "03/31", "04/01", "04/02", "04/07", "04/08", "04/09", "04/10", "04/13", "04/14", "04/15", "04/16", "04/17", "04/20"], "close": [41.75, 42.3, 42.45, 42.5, 43.2, 43.05, 43.2, 44.1, 44.1, 44.75, 44.0, 43.45, 43.35, 43.15, 42.85, 43.0, 43.8, 43.65, 43.2, 43.3, 43.55, 45.5, 46.7, 46.6, 47.0, 46.95, 46.95, 46.8, 45.75, 46.1, 45.7, 45.0, 45.7, 45.7, 45.9, 46.1, 47.3, 46.25, 45.57, 45.76, 44.75, 44.45, 44.02, 44.79, 45.23, 46.0, 44.1, 43.2, 43.65, 43.45, 43.05, 43.5, 43.25, 44.05, 43.8, 43.8, 44.35, 44.6, 45.2, 46.2], "ma5": [41.02, 41.38, 41.69, 42.01, 42.44, 42.7, 42.88, 43.21, 43.53, 43.84, 44.03, 44.08, 43.93, 43.74, 43.36, 43.16, 43.23, 43.29, 43.3, 43.39, 43.5, 43.84, 44.45, 45.13, 45.87, 46.55, 46.84, 46.86, 46.69, 46.51, 46.26, 45.87, 45.65, 45.64, 45.6, 45.68, 46.14, 46.25, 46.22, 46.2, 45.93, 45.36, 44.91, 44.75, 44.65, 44.9, 44.83, 44.66, 44.44, 44.08, 43.49, 43.37, 43.38, 43.46, 43.53, 43.68, 43.85, 44.12, 44.35, 44.83], "ma20": [40.9, 40.98, 41.08, 41.2, 41.35, 41.46, 41.55, 41.69, 41.83, 42.02, 42.16, 42.28, 42.4, 42.52, 42.61, 42.73, 42.89, 43.03, 43.14, 43.26, 43.35, 43.51, 43.72, 43.92, 44.11, 44.31, 44.5, 44.63, 44.71, 44.78, 44.87, 44.94, 45.06, 45.19, 45.34, 45.5, 45.67, 45.8, 45.92, 46.04, 46.1, 46.05, 45.92, 45.83, 45.74, 45.69, 45.55, 45.37, 45.26, 45.13, 45.0, 44.92, 44.8, 44.72, 44.61, 44.5, 44.35, 44.27, 44.25, 44.27], "vol": [1673, 1367, 1118, 1270, 1366, 950, 896, 2079, 3050, 1230, 1453, 1298, 966, 972, 1213, 518, 836, 549, 690, 498, 528, 5647, 3262, 1656, 1342, 1127, 1754, 1239, 2249, 832, 1385, 7379, 1917, 1134, 1287, 2930, 2582, 2236, 1008, 1663, 1754, 1684, 1621, 1439, 1740, 2179, 3408, 1439, 697, 1365, 962, 1120, 764, 2738, 1192, 1008, 1285, 809, 1664, 2726]}</script></div>
+    <div class="chart-legend">
+      <span><span class="leg-line" style="background:#2563eb;"></span>收盤價</span>
+      <span><span class="leg-line" style="background:#f59e0b;"></span>MA5</span>
+      <span><span class="leg-dash"></span>MA20</span>
+    </div>
+  </div>
+  <div class="section-title">💼 法人籌碼</div>
+  <div class="analysis">🌍 外資：連買 6 日（單日最高 1,368 張），小額但持續，外資默默佈局。<br>🚨 出場警示：✅ 持續偏多</div>
+  <div class="section-title">📰 最新新聞</div>
+  <div class="news-box">
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】台汽電 2026年3月合併營收52.7億元 年增594.01%</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】台汽電董事會決議召開115年股東常會</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】台汽電於董事會通過114年度合併財務報告</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】台汽電董事會決議114年度盈餘分配案</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】台汽電訂定現金增資認股基準日相關事宜。</div>
+    
+  </div>
+</div>
+
+<div class="card" style=""
+  data-vol="3901"
+  data-ratio="2.27"
+  data-fdays="6"
+  data-price="38.65"
+  data-code="8213"
+  data-name="志超">
+  
+  <div class="card-header">
+    <div>
+      <span class="code">8213</span>
+      <span class="name">志超</span>
+      
+    </div>
+    <div class="right">
+      <span class="price">NT$ 38.65</span>
+      <span class="badge">外資✅</span>
+      <span class="warn warn-ok">✅ 持續偏多</span>
+    </div>
+  </div>
+  <div class="metrics">
+    <div class="metric"><div class="m-label">成交量</div><div class="m-val">3,901 張</div></div>
+    <div class="metric"><div class="m-label">量比</div><div class="m-val">2.27x</div></div>
+    <div class="metric"><div class="m-label">外資連買</div><div class="m-val">6 日</div></div>
+    <div class="metric"><div class="m-label">投信連買</div><div class="m-val">0 日</div></div>
+    <div class="metric"><div class="m-label">MA5</div><div class="m-val">36.29</div></div>
+    <div class="metric"><div class="m-label">MA20</div><div class="m-val">33.94</div></div>
+  </div>
+  <div class="section-title">📐 技術面解讀</div>
+  <div class="analysis">📐 均線：MA5(36.29) 高於 MA20(33.94) 2.35元（6.9%），均線強勢擴張，多頭格局確立。<br>📊 MACD：MACD柱狀體持續上揚，動能健康（柱狀體 0.6058）。<br>📦 成交量：明顯放量，買盤積極進場（量比 2.27x，當日 3,901 張）。</div>
+  <div class="chart-wrap">
+    <div class="chart-title">📈 近60日走勢（收盤價 / MA5 / MA20）</div>
+    <div style="position:relative;height:180px;width:100%;overflow:hidden;"><div style="position:relative;height:180px;width:100%;overflow:hidden;"><canvas id="chart-8213" class="scan-chart"></canvas></div><script id="cd-chart-8213" type="application/json">{"dates": ["01/13", "01/14", "01/15", "01/16", "01/19", "01/20", "01/21", "01/22", "01/23", "01/26", "01/27", "01/28", "01/29", "01/30", "02/02", "02/03", "02/04", "02/05", "02/06", "02/09", "02/10", "02/11", "02/23", "02/24", "02/25", "02/26", "03/02", "03/03", "03/04", "03/05", "03/06", "03/09", "03/10", "03/11", "03/12", "03/13", "03/16", "03/17", "03/18", "03/19", "03/20", "03/23", "03/24", "03/25", "03/26", "03/27", "03/30", "03/31", "04/01", "04/02", "04/07", "04/08", "04/09", "04/10", "04/13", "04/14", "04/15", "04/16", "04/17", "04/20"], "close": [34.4, 34.7, 34.9, 34.55, 34.5, 35.15, 35.15, 35.85, 35.8, 35.95, 36.3, 36.3, 36.3, 35.4, 34.7, 35.45, 37.7, 36.6, 34.95, 34.6, 35.0, 36.3, 36.65, 37.4, 38.1, 38.7, 38.25, 37.85, 36.3, 37.2, 37.55, 35.7, 36.25, 36.45, 34.55, 33.6, 33.2, 33.75, 33.95, 33.8, 33.05, 32.6, 32.3, 32.6, 32.7, 33.55, 32.75, 32.05, 33.65, 33.3, 32.65, 33.55, 33.65, 34.9, 34.0, 34.75, 35.4, 36.05, 36.6, 38.65], "ma5": [34.08, 34.16, 34.44, 34.66, 34.61, 34.76, 34.85, 35.04, 35.29, 35.58, 35.81, 36.04, 36.13, 36.05, 35.8, 35.63, 35.91, 35.97, 35.88, 35.86, 35.77, 35.49, 35.5, 35.99, 36.69, 37.43, 37.82, 38.06, 37.84, 37.66, 37.43, 36.92, 36.6, 36.63, 36.1, 35.31, 34.81, 34.31, 33.81, 33.66, 33.55, 33.43, 33.14, 32.87, 32.65, 32.75, 32.78, 32.73, 32.94, 33.06, 32.88, 33.04, 33.36, 33.61, 33.75, 34.17, 34.54, 35.02, 35.36, 36.29], "ma20": [33.09, 33.17, 33.27, 33.36, 33.45, 33.55, 33.64, 33.79, 33.94, 34.11, 34.29, 34.48, 34.67, 34.8, 34.92, 35.07, 35.24, 35.4, 35.47, 35.46, 35.49, 35.57, 35.66, 35.8, 35.98, 36.16, 36.31, 36.41, 36.44, 36.5, 36.56, 36.54, 36.53, 36.59, 36.58, 36.48, 36.26, 36.12, 36.07, 36.03, 35.93, 35.74, 35.53, 35.29, 35.02, 34.76, 34.48, 34.19, 34.06, 33.87, 33.62, 33.51, 33.38, 33.31, 33.28, 33.34, 33.45, 33.56, 33.69, 33.94], "vol": [540, 516, 219, 423, 377, 801, 601, 938, 932, 796, 1079, 609, 1219, 856, 501, 471, 3162, 1426, 978, 615, 368, 1464, 1010, 1286, 1586, 2915, 1290, 1039, 1320, 789, 819, 687, 488, 1367, 2552, 970, 1544, 420, 633, 843, 1386, 444, 474, 321, 462, 437, 485, 734, 925, 563, 561, 420, 248, 1374, 749, 949, 1178, 1067, 1482, 3901]}</script></div>
+    <div class="chart-legend">
+      <span><span class="leg-line" style="background:#2563eb;"></span>收盤價</span>
+      <span><span class="leg-line" style="background:#f59e0b;"></span>MA5</span>
+      <span><span class="leg-dash"></span>MA20</span>
+    </div>
+  </div>
+  <div class="section-title">💼 法人籌碼</div>
+  <div class="analysis">🌍 外資：連買 6 日（單日最高 2,206 張），小額但持續，外資默默佈局。<br>🚨 出場警示：✅ 持續偏多</div>
+  <div class="section-title">📰 最新新聞</div>
+  <div class="news-box">
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】志超 2026年3月合併營收15.97億元 年增-3.08%</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】志超董事會決議股利分派</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】志超 2026年2月合併營收12.74億元 年增-7.62%</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】志超民國114年度財務報告董事會預計召開日期為115年03月11日</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】志超代重要子公司Brilliant Star Holdings Limited.公告法人股東重新指派董事</div>
+    
+  </div>
+</div>
+
+<div class="card" style=""
+  data-vol="14245"
+  data-ratio="1.69"
+  data-fdays="6"
+  data-price="187.0"
+  data-code="6672"
+  data-name="騰輝電子-KY">
+  
+  <div class="card-header">
+    <div>
+      <span class="code">6672</span>
+      <span class="name">騰輝電子-KY</span>
+      
+    </div>
+    <div class="right">
+      <span class="price">NT$ 187.0</span>
+      <span class="badge">外資✅</span>
+      <span class="warn warn-ok">✅ 持續偏多</span>
+    </div>
+  </div>
+  <div class="metrics">
+    <div class="metric"><div class="m-label">成交量</div><div class="m-val">14,245 張</div></div>
+    <div class="metric"><div class="m-label">量比</div><div class="m-val">1.69x</div></div>
+    <div class="metric"><div class="m-label">外資連買</div><div class="m-val">6 日</div></div>
+    <div class="metric"><div class="m-label">投信連買</div><div class="m-val">0 日</div></div>
+    <div class="metric"><div class="m-label">MA5</div><div class="m-val">164.58</div></div>
+    <div class="metric"><div class="m-label">MA20</div><div class="m-val">138.84</div></div>
+  </div>
+  <div class="section-title">📐 技術面解讀</div>
+  <div class="analysis">📐 均線：MA5(164.58) 高於 MA20(138.84) 25.74元（18.5%），均線強勢擴張，多頭格局確立。<br>📊 MACD：MACD柱狀體強勁擴張，動能極強（柱狀體 4.2395）。<br>📦 成交量：溫和放量，穩健推升（量比 1.69x，當日 14,245 張）。</div>
+  <div class="chart-wrap">
+    <div class="chart-title">📈 近60日走勢（收盤價 / MA5 / MA20）</div>
+    <div style="position:relative;height:180px;width:100%;overflow:hidden;"><div style="position:relative;height:180px;width:100%;overflow:hidden;"><canvas id="chart-6672" class="scan-chart"></canvas></div><script id="cd-chart-6672" type="application/json">{"dates": ["01/13", "01/14", "01/15", "01/16", "01/19", "01/20", "01/21", "01/22", "01/23", "01/26", "01/27", "01/28", "01/29", "01/30", "02/02", "02/03", "02/04", "02/05", "02/06", "02/09", "02/10", "02/11", "02/23", "02/24", "02/25", "02/26", "03/02", "03/03", "03/04", "03/05", "03/06", "03/09", "03/10", "03/11", "03/12", "03/13", "03/16", "03/17", "03/18", "03/19", "03/20", "03/23", "03/24", "03/25", "03/26", "03/27", "03/30", "03/31", "04/01", "04/02", "04/07", "04/08", "04/09", "04/10", "04/13", "04/14", "04/15", "04/16", "04/17", "04/20"], "close": [89.82, 98.33, 100.78, 96.57, 97.55, 96.38, 96.38, 98.33, 97.36, 98.33, 95.69, 94.42, 92.46, 87.87, 83.85, 85.61, 94.13, 103.23, 97.65, 95.89, 94.32, 92.56, 96.08, 99.8, 98.82, 99.8, 96.97, 96.57, 90.7, 93.25, 97.36, 87.67, 90.41, 93.64, 93.54, 95.4, 98.33, 100.29, 99.8, 109.59, 120.35, 115.46, 126.71, 125.24, 127.69, 128.67, 125.73, 122.8, 127.2, 126.71, 126.22, 138.45, 150.68, 146.77, 145.3, 147.75, 152.15, 160.0, 176.0, 187.0], "ma5": [89.06, 91.0, 93.87, 95.38, 96.61, 97.92, 97.53, 97.04, 97.2, 97.36, 97.22, 96.83, 95.65, 93.76, 90.86, 88.84, 88.79, 90.94, 92.89, 95.3, 97.04, 96.73, 95.3, 95.73, 96.32, 97.42, 98.3, 98.39, 96.57, 95.46, 94.97, 93.11, 91.88, 92.46, 92.52, 92.13, 94.26, 96.24, 97.47, 100.68, 105.67, 109.1, 114.38, 119.47, 123.09, 124.75, 126.81, 126.03, 126.42, 126.22, 125.73, 128.28, 133.85, 137.77, 141.48, 145.79, 148.53, 150.39, 156.24, 164.58], "ma20": [89.57, 90.06, 90.71, 91.16, 91.73, 92.11, 92.26, 92.59, 92.91, 93.25, 93.45, 93.69, 93.78, 93.56, 93.37, 93.26, 93.54, 94.38, 94.81, 95.03, 95.26, 94.97, 94.73, 94.9, 94.96, 95.13, 95.16, 95.07, 94.74, 94.48, 94.57, 94.23, 94.13, 94.42, 94.9, 95.39, 95.6, 95.45, 95.56, 96.25, 97.55, 98.69, 100.22, 101.5, 102.94, 104.38, 105.82, 107.13, 108.96, 110.63, 112.07, 114.61, 117.63, 120.28, 122.87, 125.49, 128.18, 131.16, 134.97, 138.84], "vol": [1705, 3601, 8051, 3172, 2482, 1447, 1624, 2938, 1458, 3853, 1598, 1148, 1124, 1357, 1272, 742, 1549, 7212, 7466, 4779, 1542, 1595, 1124, 2138, 1997, 1177, 1045, 1673, 1647, 749, 833, 1493, 1027, 697, 688, 929, 1537, 2337, 2146, 4342, 10161, 17877, 10997, 19627, 13575, 7326, 4690, 4040, 4472, 6065, 3691, 5084, 13238, 7324, 5084, 5235, 8009, 11002, 3744, 14245]}</script></div>
+    <div class="chart-legend">
+      <span><span class="leg-line" style="background:#2563eb;"></span>收盤價</span>
+      <span><span class="leg-line" style="background:#f59e0b;"></span>MA5</span>
+      <span><span class="leg-dash"></span>MA20</span>
+    </div>
+  </div>
+  <div class="section-title">💼 法人籌碼</div>
+  <div class="analysis">🌍 外資：連買 6 日（單日最高 2,964 張），小額但持續，外資默默佈局。<br>🚨 出場警示：✅ 持續偏多</div>
+  <div class="section-title">📰 最新新聞</div>
+  <div class="news-box">
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】騰輝電子-KY 2026年3月合併營收4.81億元 年增32.73%</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】係因騰輝電子-KY有價證券於集中交易市場達公布注意交易資訊標準，故公布相關財務業務等重大訊息，以利投資人區別暸解。</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】騰輝電子國際集團股份有限公司國內第一次無擔保(例：第一次有擔保)轉(交)換公司債(簡稱：騰輝電子一KY，代碼：66721)停止受理轉交換等相關事項。</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 騰輝-KY去年賺近半個股本　航太PI材料助攻</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】騰輝電子-KY代子公司VIG SAMOA公告對其子公司Ventec Electronics (Thailand) Co., Ltd.增資</div>
+    
+  </div>
+</div>
+
+<div class="card" style=""
+  data-vol="13194"
+  data-ratio="1.94"
+  data-fdays="6"
+  data-price="126.0"
+  data-code="8261"
+  data-name="富鼎">
+  
+  <div class="card-header">
+    <div>
+      <span class="code">8261</span>
+      <span class="name">富鼎</span>
+      
+    </div>
+    <div class="right">
+      <span class="price">NT$ 126.0</span>
+      <span class="badge">外資✅</span>
+      <span class="warn warn-ok">✅ 持續偏多</span>
+    </div>
+  </div>
+  <div class="metrics">
+    <div class="metric"><div class="m-label">成交量</div><div class="m-val">13,194 張</div></div>
+    <div class="metric"><div class="m-label">量比</div><div class="m-val">1.94x</div></div>
+    <div class="metric"><div class="m-label">外資連買</div><div class="m-val">6 日</div></div>
+    <div class="metric"><div class="m-label">投信連買</div><div class="m-val">0 日</div></div>
+    <div class="metric"><div class="m-label">MA5</div><div class="m-val">117.9</div></div>
+    <div class="metric"><div class="m-label">MA20</div><div class="m-val">107.59</div></div>
+  </div>
+  <div class="section-title">📐 技術面解讀</div>
+  <div class="analysis">📐 均線：MA5(117.9) 高於 MA20(107.59) 10.31元（9.6%），均線強勢擴張，多頭格局確立。<br>📊 MACD：MACD柱狀體強勁擴張，動能極強（柱狀體 2.0542）。<br>📦 成交量：溫和放量，穩健推升（量比 1.94x，當日 13,194 張）。</div>
+  <div class="chart-wrap">
+    <div class="chart-title">📈 近60日走勢（收盤價 / MA5 / MA20）</div>
+    <div style="position:relative;height:180px;width:100%;overflow:hidden;"><div style="position:relative;height:180px;width:100%;overflow:hidden;"><canvas id="chart-8261" class="scan-chart"></canvas></div><script id="cd-chart-8261" type="application/json">{"dates": ["01/13", "01/14", "01/15", "01/16", "01/19", "01/20", "01/21", "01/22", "01/23", "01/26", "01/27", "01/28", "01/29", "01/30", "02/02", "02/03", "02/04", "02/05", "02/06", "02/09", "02/10", "02/11", "02/23", "02/24", "02/25", "02/26", "03/02", "03/03", "03/04", "03/05", "03/06", "03/09", "03/10", "03/11", "03/12", "03/13", "03/16", "03/17", "03/18", "03/19", "03/20", "03/23", "03/24", "03/25", "03/26", "03/27", "03/30", "03/31", "04/01", "04/02", "04/07", "04/08", "04/09", "04/10", "04/13", "04/14", "04/15", "04/16", "04/17", "04/20"], "close": [88.5, 90.5, 90.1, 90.9, 94.8, 96.7, 98.2, 100.0, 96.9, 95.9, 95.0, 96.2, 95.5, 92.5, 88.8, 88.4, 89.8, 93.1, 89.9, 90.6, 90.2, 89.6, 94.9, 95.3, 95.5, 98.4, 98.8, 99.1, 94.6, 97.8, 101.0, 96.5, 99.1, 101.0, 101.0, 111.0, 112.5, 112.5, 114.0, 112.5, 107.5, 104.0, 105.5, 104.5, 103.5, 102.5, 99.3, 96.6, 99.3, 100.5, 104.0, 108.5, 108.0, 107.5, 111.0, 111.0, 109.0, 116.0, 127.5, 126.0], "ma5": [89.44, 89.38, 89.68, 90.1, 90.96, 92.6, 94.14, 96.12, 97.32, 97.54, 97.2, 96.8, 95.9, 95.02, 93.6, 92.28, 91.0, 90.52, 90.0, 90.36, 90.72, 90.68, 91.04, 92.12, 93.1, 94.74, 96.58, 97.42, 97.28, 97.74, 98.26, 97.8, 97.8, 99.08, 99.72, 101.72, 104.92, 107.6, 110.2, 112.5, 111.8, 110.1, 108.7, 106.8, 105.0, 104.0, 103.06, 101.28, 100.24, 99.64, 99.94, 101.78, 104.06, 105.7, 107.8, 109.2, 109.3, 110.9, 114.9, 117.9], "ma20": [90.07, 90.22, 90.4, 90.42, 90.67, 91.01, 91.34, 91.81, 92.11, 92.34, 92.55, 92.87, 93.14, 93.15, 93.05, 92.88, 92.83, 93.06, 93.11, 93.12, 93.2, 93.15, 93.4, 93.62, 93.65, 93.74, 93.77, 93.72, 93.61, 93.7, 94.0, 94.02, 94.2, 94.62, 95.23, 96.36, 97.5, 98.47, 99.67, 100.77, 101.63, 102.35, 102.88, 103.34, 103.74, 103.95, 103.97, 103.85, 104.08, 104.22, 104.37, 104.97, 105.41, 105.74, 106.24, 106.24, 106.06, 106.24, 106.91, 107.59], "vol": [936, 1681, 694, 1425, 3808, 4017, 7616, 6255, 2950, 1430, 1000, 2551, 4841, 1296, 1301, 890, 561, 3683, 1445, 978, 801, 1160, 2214, 1307, 833, 4416, 3725, 4388, 2462, 2184, 4905, 3746, 2927, 4189, 3243, 9180, 16082, 6333, 4317, 2704, 5402, 2606, 2154, 1965, 1624, 1129, 1901, 1387, 1018, 1465, 1642, 3977, 2063, 1729, 2752, 2414, 2053, 5735, 10599, 13194]}</script></div>
+    <div class="chart-legend">
+      <span><span class="leg-line" style="background:#2563eb;"></span>收盤價</span>
+      <span><span class="leg-line" style="background:#f59e0b;"></span>MA5</span>
+      <span><span class="leg-dash"></span>MA20</span>
+    </div>
+  </div>
+  <div class="section-title">💼 法人籌碼</div>
+  <div class="analysis">🌍 外資：連買 6 日（單日最高 4,251 張），中等規模，外資穩定加碼。<br>🚨 出場警示：✅ 持續偏多</div>
+  <div class="section-title">📰 最新新聞</div>
+  <div class="news-box">
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】更正富鼎114年董事酬勞資訊</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】富鼎公司公布2026年第一季度營運成果</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】富鼎董事會通過115年第一季合併財務報告</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】富鼎受邀參加玉山證券法人說明會</div>
+    
+    <div class="news-item">📰 [Yahoo股市] 【公告】富鼎115年第一季合併財務報告董事會預計召開日期為115年04月15日</div>
+    
+  </div>
+</div>
+
+
+<div class="footer">⚠️ 本報告僅供參考，不構成投資建議。投資有風險，請審慎評估。</div>
+
+<script>
+function initScanChart(canvas) {
+  const raw = document.getElementById('cd-' + canvas.id);
+  if (!raw) return;
+  const d = JSON.parse(raw.textContent);
+  const dark = window.matchMedia('(prefers-color-scheme:dark)').matches;
+  const grid = dark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)';
+  const tick = '#94a3b8';
+  new Chart(canvas, {
+    data: {
+      labels: d.dates,
+      datasets: [
+        {type:'bar',   label:'量',   data:d.vol,   backgroundColor:'rgba(37,99,235,0.15)', yAxisID:'y2', order:2},
+        {type:'line',  label:'收盤', data:d.close, borderColor:'#2563eb', borderWidth:2,   pointRadius:0, yAxisID:'y', tension:0.1, order:1},
+        {type:'line',  label:'MA5',  data:d.ma5,   borderColor:'#f59e0b', borderWidth:1.5, pointRadius:0, yAxisID:'y', tension:0.1, spanGaps:true, order:1},
+        {type:'line',  label:'MA20', data:d.ma20,  borderColor:'#dc2626', borderWidth:1.5, borderDash:[4,3], pointRadius:0, yAxisID:'y', tension:0.1, spanGaps:true, order:1},
+      ]
+    },
+    options: {
+      responsive:true, maintainAspectRatio:false, animation:{duration:0},
+      interaction:{mode:'index', intersect:false},
+      plugins:{
+        legend:{display:false},
+        tooltip:{callbacks:{label:ctx => ctx.datasetIndex===0 ? `量:${ctx.parsed.y.toLocaleString()}張` : `${ctx.dataset.label}:${ctx.parsed.y}`}}
+      },
+      scales:{
+        y:  {position:'left',  grid:{color:grid}, ticks:{font:{size:9}, color:tick, maxTicksLimit:4}},
+        y2: {position:'right', grid:{drawOnChartArea:false}, ticks:{font:{size:9}, color:tick, maxTicksLimit:3}},
+        x:  {ticks:{font:{size:9}, color:tick, maxTicksLimit:6}}
+      }
+    }
+  });
+}
+
+function initPortfolioChart(canvas) {
+  const raw = document.getElementById('cd-' + canvas.id);
+  if (!raw) return;
+  const d = JSON.parse(raw.textContent);
+  const tick = '#94a3b8';
+  const annotations = {};
+  if (d.buy_price) {
+    annotations.buyLine = {type:'line', yMin:d.buy_price, yMax:d.buy_price, borderColor:'#7c3aed', borderWidth:1, borderDash:[3,2],
+      label:{content:`買 ${d.buy_price}`, display:true, position:'end', font:{size:8}, color:'#7c3aed', backgroundColor:'transparent', padding:2}};
+  }
+  if (d.trail_stop) {
+    annotations.trailLine = {type:'line', yMin:d.trail_stop, yMax:d.trail_stop, borderColor:'#f59e0b', borderWidth:1, borderDash:[4,2],
+      label:{content:`停 ${d.trail_stop}`, display:true, position:'end', font:{size:8}, color:'#f59e0b', backgroundColor:'transparent', padding:2}};
+  }
+  (d.resistances||[]).forEach((r,i) => {
+    annotations[`res${i}`] = {type:'line', yMin:r[0], yMax:r[0], borderColor:'rgba(220,38,38,0.4)', borderWidth:1, borderDash:[3,2]};
+  });
+  (d.supports||[]).forEach((s,i) => {
+    annotations[`sup${i}`] = {type:'line', yMin:s[0], yMax:s[0], borderColor:'rgba(5,150,105,0.4)', borderWidth:1, borderDash:[3,2]};
+  });
+  if (d.buy_idx !== null && d.buy_idx !== undefined && d.close[d.buy_idx] !== null) {
+    annotations.buyMarker = {type:'point', xValue:d.buy_idx, yValue:d.close[d.buy_idx],
+      backgroundColor:'#7c3aed', radius:6, pointStyle:'triangle'};
+  }
+  new Chart(canvas, {
+    data: {
+      labels: d.dates,
+      datasets: [
+        {type:'bar',  label:'量',   data:d.vol,   backgroundColor:'rgba(37,99,235,0.15)', yAxisID:'y2', order:2},
+        {type:'line', label:'收盤', data:d.close, borderColor:'#2563eb', borderWidth:2,   pointRadius:0, yAxisID:'y', tension:0.1, order:1},
+        {type:'line', label:'MA5',  data:d.ma5,   borderColor:'#f59e0b', borderWidth:1.5, pointRadius:0, yAxisID:'y', tension:0.1, spanGaps:true, order:1},
+        {type:'line', label:'MA20', data:d.ma20,  borderColor:'#dc2626', borderWidth:1.5, borderDash:[4,3], pointRadius:0, yAxisID:'y', tension:0.1, spanGaps:true, order:1},
+      ]
+    },
+    options: {
+      responsive:true, maintainAspectRatio:false, animation:{duration:0},
+      interaction:{mode:'index', intersect:false},
+      plugins:{
+        legend:{display:false},
+        annotation:{annotations},
+        tooltip:{callbacks:{label:ctx => ctx.datasetIndex===0 ? `量:${ctx.parsed.y.toLocaleString()}張` : `${ctx.dataset.label}:${ctx.parsed.y}`}}
+      },
+      scales:{
+        y:  {position:'left',  ticks:{font:{size:9}, color:tick, maxTicksLimit:4}},
+        y2: {position:'right', grid:{drawOnChartArea:false}, ticks:{font:{size:9}, color:tick, maxTicksLimit:3}},
+        x:  {ticks:{font:{size:9}, color:tick, maxTicksLimit:6}}
+      }
+    }
+  });
+}
+
+document.querySelectorAll('.scan-chart').forEach(initScanChart);
+document.querySelectorAll('.portfolio-chart').forEach(initPortfolioChart);
+
+function filterCards(q) {
+  q = q.trim().toLowerCase();
+  const cards = document.querySelectorAll('.card');
+  let shown = 0;
+  cards.forEach(c => {
+    const match = !q || ((c.dataset.code||'')+(c.dataset.name||'')).toLowerCase().includes(q);
+    c.style.display = match ? '' : 'none';
+    if (match) shown++;
+  });
+  const cnt = document.getElementById('search-count');
+  if (cnt) cnt.textContent = q ? `顯示 ${shown} / ${cards.length} 檔` : '';
+}
+
+function sortCards(key, btn) {
+  document.querySelectorAll('.sort-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const container = document.querySelector('body');
+  const cards = Array.from(document.querySelectorAll('.card'));
+  const asc = key === 'price';
+  cards.sort((a,b) => {
+    const va = parseFloat(a.dataset[key]||0), vb = parseFloat(b.dataset[key]||0);
+    return asc ? va-vb : vb-va;
+  });
+  const footer = document.querySelector('.footer');
+  cards.forEach(c => container.insertBefore(c, footer));
+}
+</script>
+</body>
+</html>
